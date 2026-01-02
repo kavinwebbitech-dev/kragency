@@ -293,26 +293,49 @@ class CustomerController extends Controller
     //         return DataTables::of($results)->make(true);
     //     }
     // }
+    // public function getTableData(Request $request)
+    // {
+    //     if ($request->ajax()) {
+
+    //         $results = DB::table('schedule_provider')
+    //             ->leftJoin('betting_providers', 'schedule_provider.betting_providers_id', '=', 'betting_providers.id')
+    //             ->leftJoin('provider_times', 'provider_times.id', '=', 'schedule_provider.slot_time_id')
+    //             ->select(
+    //                 'schedule_provider.id',
+    //                 'betting_providers.name as provider_name',
+    //                 'provider_times.time as slot_time',
+    //                 'schedule_provider.result',
+    //                 'schedule_provider.created_at'
+    //             )
+    //             ->whereDate('schedule_provider.created_at', now()->toDateString())
+    //             ->orderBy('schedule_provider.created_at', 'desc'); 
+
+    //         return DataTables::of($results)->make(true);
+    //     }
+    // }
     public function getTableData(Request $request)
-    {
-        if ($request->ajax()) {
-
-            $results = DB::table('schedule_provider')
-                ->leftJoin('betting_providers', 'schedule_provider.betting_providers_id', '=', 'betting_providers.id')
-                ->leftJoin('provider_times', 'provider_times.id', '=', 'schedule_provider.slot_time_id')
-                ->select(
-                    'schedule_provider.id',
-                    'betting_providers.name as provider_name',
-                    'provider_times.time as slot_time',
-                    'schedule_provider.result',
-                    'schedule_provider.created_at'
-                )
-                ->whereDate('schedule_provider.created_at', now()->toDateString())
-                ->orderBy('schedule_provider.created_at', 'desc'); 
-
-            return DataTables::of($results)->make(true);
-        }
+{
+    if (!$request->ajax()) {
+        abort(404);
     }
+
+    $results = DB::table('schedule_provider')
+        ->leftJoin('betting_providers', 'schedule_provider.betting_providers_id', '=', 'betting_providers.id')
+        ->leftJoin('provider_times', 'provider_times.id', '=', 'schedule_provider.slot_time_id')
+        ->select(
+            'schedule_provider.id',
+            'betting_providers.name as provider_name',
+            'provider_times.time as slot_time',
+            'schedule_provider.result',
+            'schedule_provider.created_at'
+        )
+        ->whereDate('schedule_provider.created_at', now()->toDateString());
+
+    return DataTables::of($results)
+        ->addIndexColumn()
+        ->rawColumns([])
+        ->make(true);
+}
 
 
     public function customerOrderDetails()
