@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-popover-x.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
+    <title>kragncy</title>
+</head>
+<body>
+    <!-- ==========Preloader========== -->
+    <div class="preloader">
+        <div class="preloader-inner">
+            <div class="preloader-icon">
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <!-- ==========Preloader========== -->
+    <!-- ==========Overlay========== -->
+    <div class="overlay"></div>
+    <a href="#" class="scrollToTop">
+        <i class="fas fa-angle-up"></i>
+    </a>
+    <!-- ==========Overlay========== -->
+    <!-- ==========Header-Section========== -->
+    <div id="header"></div>
+    <!-- Register Area -->
+    <!-- Register Area -->
+    <!-- Login Area -->
+    <!-- Login Area -->
+    <!-- ==========Header-Section========== -->
+    <!-- ==========Breadcrumb-Section========== -->
+    <!-- ==========Breadcrumb-Section========== -->
+    <!-- ==========Results-Section========== -->
+    <section class="results mt-4">
+        <div class="lottery-result result-page">
+            <div class="container">
+                <div class="row">
+                  
+                    <div class="col-md-12">
+                        <div class="receipt">
+  <div class="receipt-header">
+    <span class="receipt-name">Name: Guest</span>
+    <span class="receipt-date">Date:</span>
+  </div>
+  <div class="receipt-table">
+    <div class="receipt-row receipt-header-row">
+      <div class="receipt-cell receipt-lot-details">Lot Details</div>
+      <div class="receipt-cell receipt-number">Number</div>
+      <div class="receipt-cell receipt-unit">Unit</div>
+      <div class="receipt-cell receipt-currency">₹</div>
+      <div class="receipt-cell receipt-amount">Amount ₹</div>
+    </div>
+    <div class="receipt-row receipt-total-row">
+      <div class="receipt-cell receipt-total-label">Total Amount:</div>
+      <div class="receipt-cell receipt-total-value">0.00</div>
+    </div>
+  </div>
+  <div class="receipt-footer">
+    <span class="receipt-note">** Some items are removed automatically if draw time expired.</span>
+  </div>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ==========Results-Section========== -->
+    <!-- ==========Newslater-Section========== -->
+    <div id="footer"></div>
+    <!-- ==========Newslater-Section========== -->
+    <!-- All js link starts hear -->
+    <script src="assets/js/jquery-3.3.1.min.js"></script>
+    <script src="assets/js/modernizr-3.6.0.min.js"></script>
+    <script src="assets/js/plugins.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/magnific-popup.min.js"></script>
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <script src="assets/js/countdown.min.js"></script>
+    <script src="assets/js/bootstrap-popover-x.min.js"></script>
+    <script src="assets/js/amd.js"></script>
+    <script src="assets/js/nice-select.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        // Counter functionality
+        document.querySelectorAll(".game-box").forEach(box => {
+            box.querySelectorAll(".row").forEach(row => {
+                let countEl = row.querySelector(".count");
+                if (!countEl) return;
+                let minusBtn = row.querySelector(".minus");
+                let plusBtn = row.querySelector(".plus");
+                let count = parseInt(countEl.textContent);
+                minusBtn.addEventListener("click", () => {
+                    if (count > 1) count--;
+                    countEl.textContent = count;
+                });
+                plusBtn.addEventListener("click", () => {
+                    count++;
+                    countEl.textContent = count;
+                });
+            });
+            // Random button
+            let randomBtn = box.querySelector(".random-btn");
+            if (randomBtn) {
+                randomBtn.addEventListener("click", () => {
+                    box.querySelectorAll(".input-box").forEach(input => {
+                        input.value = Math.floor(Math.random() * 10);
+                    });
+                });
+            }
+        });
+        function startCountdown(elementId, seconds) {
+            let el = document.getElementById(elementId);
+            if (!el) return;
+            let timer = setInterval(() => {
+                let hrs = Math.floor(seconds / 3600);
+                let mins = Math.floor((seconds % 3600) / 60);
+                let secs = seconds % 60;
+                el.textContent =
+                    (hrs > 0 ? String(hrs).padStart(2, '0') + ":" : "") +
+                    String(mins).padStart(2, '0') + ":" +
+                    String(secs).padStart(2, '0');
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    el.textContent = "closed";
+                }
+                seconds--;
+            }, 1000);
+        }
+        // Start countdowns
+        startCountdown("countdown1", 42);      // 42 sec
+        startCountdown("countdown2", 7242); 
+    </script>
+</body>
+</html>

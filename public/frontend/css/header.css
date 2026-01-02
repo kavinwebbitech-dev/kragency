@@ -1,0 +1,360 @@
+:root {
+    --primary-color: #4e54c8;
+    --secondary-color: #8f94fb;
+    --accent-color: #ff4757;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --success-color: #28a745;
+    --gold-color: #ffd700;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #fdfbfb, #ebedee);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: linear-gradient(
+        to right,
+        var(--primary-color),
+        var(--secondary-color)
+    ) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= NAVBAR BRAND ================= */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+/* ================= COMMON LOGO ================= */
+.brand-logo {
+    width: auto;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+/* ================= MOBILE LOGO ================= */
+.brand-logo-mobile {
+    height: 34px;          /* BEST mobile size */
+    max-width: 54px;
+}
+
+/* ================= DESKTOP LOGO ================= */
+.brand-logo-desktop {
+    height: 44px;          /* PERFECT desktop size */
+    max-width: 200px;
+}
+
+/* ================= SMALL PHONES ================= */
+@media (max-width: 360px) {
+    .brand-logo-mobile {
+        height: 30px;
+        max-width: 54px;
+    }
+}
+
+/* ================= TOUCH FEEDBACK ================= */
+.brand-logo:active {
+    transform: scale(0.96);
+}
+
+.custom-toggler {
+    width: 42px;
+    height: 42px;
+    padding: 4px;
+}
+
+.navbar-toggler-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+}
+
+.header-icon {
+    position: relative;
+    margin-left: 20px;
+    color: white;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.header-icon:hover {
+    color: var(--light-color);
+    transform: translateY(-2px);
+}
+
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+    min-width: 200px;
+    transform: translateX(-20%);
+}
+
+.dropdown-item {
+    padding: 0.7rem 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+}
+
+.dropdown-divider {
+    margin: 0.3rem 0;
+}
+
+.user-info {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.user-name {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.user-email {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.logout-btn {
+    color: #dc3545 !important;
+}
+
+.logout-btn:hover {
+    background-color: #f8d7da !important;
+}
+
+/* Wallet Balance Styles */
+.wallet-balance {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 8px 15px;
+    margin-right: 15px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.wallet-balance:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.wallet-balance::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0)
+    );
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+}
+
+.wallet-balance:hover::before {
+    animation: shine 1.5s infinite;
+}
+
+@keyframes shine {
+    0% {
+        opacity: 0;
+        left: -50%;
+    }
+    20% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        left: 100%;
+    }
+}
+
+.wallet-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+    color: var(--gold-color);
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.balance-amount {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.rupee-symbol {
+    font-family: Arial, sans-serif;
+    margin-right: 2px;
+}
+
+.balance-currency {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-left: 2px;
+}
+
+.add-funds-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 15px;
+    padding: 3px 10px;
+    margin-left: 10px;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.add-funds-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Pulse animation for low balance */
+.low-balance {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Demo content styles */
+.demo-content {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.instruction {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+}
+
+.balance-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.balance-option {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.balance-option:hover {
+    background: #e9ecef;
+}
+
+footer {
+    background: var(--dark-color);
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+.cart-icon a {
+    position: relative;
+    display: inline-block;
+    color: #fff; /* make it white like the user icon */
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.cart-icon i {
+    color: #fff; /* ensure icon is white */
+}
+
+.cart-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 1px 5px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+    width: auto !important;
+    min-width: 200px;
+}
