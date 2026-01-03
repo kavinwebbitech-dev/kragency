@@ -24,7 +24,7 @@ class CustomerController extends Controller
     {
 
         $gameModel = new CreateGameScheduleModel();
-        
+
         $data['schedules'] = $gameModel->getGameSchedule();
         $data['sliders'] = \App\Models\Admin\SliderModel::where('status', true)->orderBy('order')->get();
         $data['default_provider'] = $data['schedules']->firstWhere('is_default', 1);
@@ -175,7 +175,7 @@ class CustomerController extends Controller
 
     public function paymentHistory(Request $request)
     {
-        
+
         try {
             $userId = Auth::id();
 
@@ -314,28 +314,28 @@ class CustomerController extends Controller
     //     }
     // }
     public function getTableData(Request $request)
-{
-    if (!$request->ajax()) {
-        abort(404);
+    {
+        if (!$request->ajax()) {
+            abort(404);
+        }
+
+        $results = DB::table('schedule_provider')
+            ->leftJoin('betting_providers', 'schedule_provider.betting_providers_id', '=', 'betting_providers.id')
+            ->leftJoin('provider_times', 'provider_times.id', '=', 'schedule_provider.slot_time_id')
+            ->select(
+                'schedule_provider.id',
+                'betting_providers.name as provider_name',
+                'provider_times.time as slot_time',
+                'schedule_provider.result',
+                'schedule_provider.created_at'
+            )
+            ->whereDate('schedule_provider.created_at', now()->toDateString());
+
+        return DataTables::of($results)
+            ->addIndexColumn()
+            ->rawColumns([])
+            ->make(true);
     }
-
-    $results = DB::table('schedule_provider')
-        ->leftJoin('betting_providers', 'schedule_provider.betting_providers_id', '=', 'betting_providers.id')
-        ->leftJoin('provider_times', 'provider_times.id', '=', 'schedule_provider.slot_time_id')
-        ->select(
-            'schedule_provider.id',
-            'betting_providers.name as provider_name',
-            'provider_times.time as slot_time',
-            'schedule_provider.result',
-            'schedule_provider.created_at'
-        )
-        ->whereDate('schedule_provider.created_at', now()->toDateString());
-
-    return DataTables::of($results)
-        ->addIndexColumn()
-        ->rawColumns([])
-        ->make(true);
-}
 
 
     public function customerOrderDetails()

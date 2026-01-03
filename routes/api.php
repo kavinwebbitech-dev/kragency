@@ -16,12 +16,13 @@ Route::prefix('customer')->group(function () {
 
         Route::post('logout', [AuthenticatedSessionController::class, 'logout']);
         Route::get('wallet', [CustomerController::class, 'index']);
-        Route::post('place-order', [CustomerController::class, 'placeOrder']);
-        Route::get('payment-history', [CustomerController::class, 'paymentHistory']);
-        Route::post('cart/add', [CustomerController::class, 'addToCart']);
+        Route::get('viewcart', [CustomerController::class, 'viewcart']);
+        Route::post('cart-add', [CustomerController::class, 'addToCart']);
         Route::get('cart', [CustomerController::class, 'getCart']);
-        Route::post('cart/remove', [CustomerController::class, 'removeFromCart']);
-        Route::get('orders', [CustomerController::class, 'orderDetails']);
-        Route::get('rules', [CustomerController::class, 'rules']);
+        Route::post('cart-remove', [CustomerController::class, 'removeFromCart']);
+        Route::post('place-order', [CustomerController::class, 'placeOrder']);
+        Route::get('orders', [CustomerController::class, 'customerOrderDetails']);
+        Route::get('payment-history', [CustomerController::class, 'paymentHistory']);
+    
     });
 });
