@@ -23,5 +23,8 @@ class BettingProviderSlotModel extends Model
         return $this->belongsTo(BettingProvidersModel::class, 'betting_provider_id');
     }
 
-    
+    public function digitMaster()
+    {
+        return $this->belongsTo(DigitMasterModel::class, 'slot_id', 'id');
+    }  
 }

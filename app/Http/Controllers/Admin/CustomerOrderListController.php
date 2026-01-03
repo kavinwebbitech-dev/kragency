@@ -41,7 +41,8 @@ class CustomerOrderListController extends Controller
         $query = CustomerOrderItemModel::with([
             'customerOrders.user',
             'scheduleProviderSlotTime',
-            'scheduleProviderSlotTime.getProvider'
+            'scheduleProviderSlotTime.getProvider',
+            'scheduleProviderSlotTime.providerSlot',
         ])->whereDate('created_at', $today);
 
         /* ---------- Filters ---------- */
@@ -108,6 +109,7 @@ class CustomerOrderListController extends Controller
             $type   = strlen($digits);
             $label  = $digitMap[$type] ?? '';
             $digitAdded = $digits . ($label ? " ({$label})" : '');
+            $digitAdded = $digits . ' (' . ($order->scheduleProviderSlotTime?->providerSlot?->digitMaster?->name ?? '') . ')';
 
             $data[] = [
                 'DT_RowIndex' => $start + $i + 1,

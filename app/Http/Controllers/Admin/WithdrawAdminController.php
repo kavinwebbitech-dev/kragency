@@ -27,10 +27,11 @@ class WithdrawAdminController extends Controller
             DB::beginTransaction();
             try {
                 $wallet = WalletModel::where('user_id', $withdraw->user_id)->lockForUpdate()->first();
-                if (!$wallet || $wallet->balance < $withdraw->amount) {
+                // if (!$wallet || $wallet->balance < $withdraw->amount) {
+                if (!$wallet) {
                     return back()->with('error', 'Insufficient wallet balance.');
                 }
-                $wallet->balance -= $withdraw->amount;
+                // $wallet->balance -= $withdraw->amount;
                 $wallet->save();
                 $withdraw->status = 'approved';
                 $withdraw->save();

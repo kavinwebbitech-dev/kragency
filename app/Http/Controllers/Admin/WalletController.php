@@ -43,37 +43,63 @@ class WalletController extends Controller
 
     public function addAmount(Request $request) {
         if ($request->isMethod('post')) {
-            // Validation
-            $request->validate([
-                'amount'      => 'required|numeric|min:1',
-                'customer_id' => 'required|exists:users,id',
-                'description' => 'nullable|string',
-            ]);
+            // ✅ Conditional validation
+            $rules = [
+                'customer_id'  => 'required|exists:users,id',
+                'description'  => 'nullable|string',
+            ];
+
+            if ($request->has('add_bonus')) {
+                // Bonus only
+                $rules['bonus_amount'] = 'required|numeric|min:1';
+            } else {
+                // Normal amount
+                $rules['amount'] = 'required|numeric|min:1';
+            }
+
+            $request->validate($rules);
 
             DB::transaction(function () use ($request) {
-                // Retrieve or create wallet
+
+                // Get or create wallet
                 $wallet = WalletModel::firstOrCreate(
                     ['user_id' => $request->customer_id],
-                    ['balance' => 0]
+                    ['balance' => 0, 'bonus_amount' => 0]
                 );
 
-                // Update balance atomically
-                $wallet->increment('balance', $request->amount);
+                if ($request->has('add_bonus')) {
 
-                // Create transaction log
-                WalletTransactionLogModel::create([
-                    'user_id'        => $request->customer_id,
-                    'user_wallet_id' => $wallet->id,
-                    'type'           => 'credit',
-                    'amount'         => $request->amount,
-                    'description'    => $request->description,
-                ]);
+                    // ✅ Add BONUS only
+                    $wallet->increment('bonus_amount', $request->bonus_amount);
+
+                    WalletTransactionLogModel::create([
+                        'user_id'        => $request->customer_id,
+                        'user_wallet_id' => $wallet->id,
+                        'type'           => 'credit',
+                        'amount'         => $request->bonus_amount,
+                        'description'    => $request->description,
+                    ]);
+
+                } else {
+
+                    // ✅ Add NORMAL amount
+                    $wallet->increment('balance', $request->amount);
+
+                    WalletTransactionLogModel::create([
+                        'user_id'        => $request->customer_id,
+                        'user_wallet_id' => $wallet->id,
+                        'type'           => 'credit',
+                        'amount'         => $request->amount,
+                        'description'    => $request->description,
+                    ]);
+                }
             });
 
             return redirect()
                 ->route('admin.wallet.index')
-                ->with('success', 'Amount added successfully');
+                ->with('success', 'Wallet updated successfully');
         }
+
 
 
         $data['customers'] = User::where('status', 1)->where('user_type', 'normal')->orderBy('id', 'desc')->get();

@@ -129,12 +129,12 @@
                                 `;
                             }
                             // View Stats button
-                            const viewStats = `{{ route('admin.slot-digit-stats', ':provider_id') }}`.replace(':provider_id', row.id);
-                            actions += `
-                                <a href="${viewStats}" class="btn btn-sm btn-info ms-1" target="_blank" title="View Stats">
-                                    <i class="bi bi-bar-chart"></i> Stats
-                                </a>
-                            `;
+                            // const viewStats = `{{ route('admin.slot-digit-stats', ':provider_id') }}`.replace(':provider_id', row.id);
+                            // actions += `
+                            //     <a href="${viewStats}" class="btn btn-sm btn-info ms-1" target="_blank" title="View Stats">
+                            //         <i class="bi bi-bar-chart"></i> Stats
+                            //     </a>
+                            // `;
                             // Delete button for future times only
                             if (row.slot_time && moment(row.slot_time, 'HH:mm:ss').isAfter(moment())) {
                                 actions += `

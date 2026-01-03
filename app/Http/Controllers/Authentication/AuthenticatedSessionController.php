@@ -80,7 +80,9 @@ class AuthenticatedSessionController extends Controller
     public function landingDashboard(Request $request)
     {
         $gameModel = new CreateGameScheduleModel();
-        $data['schedules'] = $gameModel->getGameSchedule();
+        $data['schedules'] = $gameModel->getGameSchedule()
+            ->sortByDesc('is_default')
+            ->values();
         $data['sliders'] = \App\Models\Admin\SliderModel::where('status', true)->orderBy('order')->get();
         $data['default_provider'] = $data['schedules']->firstWhere('is_default', 1);
        
