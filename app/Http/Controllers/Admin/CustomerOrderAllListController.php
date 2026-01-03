@@ -32,10 +32,13 @@ class CustomerOrderAllListController extends Controller
     ====================================================== */
     public function data(Request $request)
     {
+        $today = Carbon::today();
+
         $query = CustomerOrderItemModel::with([
             'customerOrders.user',
             'scheduleProviderSlotTime',
-            'scheduleProviderSlotTime.getProvider'
+            'scheduleProviderSlotTime.getProvider',
+            'scheduleProviderSlotTime.providerSlot'
         ]);
 
         /* ---------- Filters ---------- */
@@ -56,11 +59,11 @@ class CustomerOrderAllListController extends Controller
 
         if ($request->filled('customer_name')) {
             $query->whereHas('customerOrders.user',
-                fn($q) => $q->where('name','like',"%{$request->customer_name}%")
+                fn($q)=>$q->where('name','like',"%{$request->customer_name}%")
             );
         }
 
-        /* ---------- Datatable params ---------- */
+        /* ---------- Datatable ---------- */
         $draw   = (int) $request->draw;
         $start  = (int) $request->start;
         $length = (int) $request->length;
@@ -85,12 +88,12 @@ class CustomerOrderAllListController extends Controller
                         ->limit($length)
                         ->get();
 
-        /* ---------- Digit Master Mapping ---------- */
+        /* ---------- Digit Master Map ---------- */
         $digitMap = DigitMasterModel::select('type','name')
             ->orderBy('id')
             ->get()
             ->groupBy('type')
-            ->map(fn($row) =>
+            ->map(fn($row)=>
                 preg_replace('/\s*\(.*?\)/','',$row->first()->name)
             )->toArray();
 
@@ -102,6 +105,7 @@ class CustomerOrderAllListController extends Controller
             $type   = strlen($digits);
             $label  = $digitMap[$type] ?? '';
             $digitAdded = $digits . ($label ? " ({$label})" : '');
+            $digitAdded = $digits . ' (' . ($order->scheduleProviderSlotTime?->providerSlot?->digitMaster?->name ?? '') . ')';
 
             $data[] = [
                 'DT_RowIndex' => $start + $i + 1,

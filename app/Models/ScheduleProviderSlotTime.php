@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Admin\BettingProviderSlotModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Admin\BettingProvidersModel;
 
@@ -24,5 +25,10 @@ class ScheduleProviderSlotTime extends Model
     public function getProvider()
     {
         return $this->belongsTo(BettingProvidersModel::class, 'betting_providers_id', 'id');
+    }
+
+    public function providerSlot()
+    {
+        return $this->belongsTo(BettingProviderSlotModel::class, 'slot_id', 'id');
     }
 }

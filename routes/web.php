@@ -163,6 +163,7 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
 });
 
 
+Route::get('customer-rules', [CustomerController::class, 'rules'])->name('customer.rules');
 
 //user routes
 Route::middleware(['auth', 'onlyCustomer'])->group(function () {
@@ -179,7 +180,7 @@ Route::middleware(['auth', 'onlyCustomer'])->group(function () {
     Route::post('/lottery/cart/add', [CustomerController::class, 'addToCart'])->name('lottery.add-to-cart');
     Route::delete('/lottery/cart/{index}', [CustomerController::class, 'removeFromCart'])->name('lottery.remove-from-cart');
 
-    Route::get('customer-rules', [CustomerController::class, 'rules'])->name('customer.rules');
+    // Route::get('customer-rules', [CustomerController::class, 'rules'])->name('customer.rules');
 
 
     Route::get('customer-order-details', [CustomerController::class, 'customerOrderDetails'])->name('customer-order-details');

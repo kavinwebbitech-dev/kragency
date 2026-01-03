@@ -110,7 +110,7 @@
                         <div class="draw-grid">
 
                             @foreach ($schedules as $index => $provider)
-                                @if ($provider->is_default == 0)
+                                {{-- @if ($provider->is_default == 0) --}}
                                     <a href="{{ !empty($provider->next_slot_time)
                                         ? route('customer.play-now', [
                                             'id' => $provider->betting_providers_id,
@@ -130,6 +130,9 @@
 
                                             <h4 class="draw-card__title">
                                                 {{ $provider->name }}
+                                                @if ($provider->is_default == 1)
+                                                    <small class="text-success">(Default)</small>
+                                                @endif
                                             </h4>
 
                                             {{-- BUTTON AS DIV (NOT LINK) --}}
@@ -156,7 +159,7 @@
                                         </div>
 
                                     </a>
-                                @endif
+                                {{-- @endif --}}
                             @endforeach
 
                         </div>
@@ -202,7 +205,7 @@
     </section>
 
     <!-- ==========Check-Number-Section========== -->
-    @if (!empty($default_provider))
+    {{-- @if (!empty($default_provider))
         <section class="check-number pt-0">
             <img class="img-left" src="{{ asset('frontend/images/check-num-left.png') }}" alt="">
             <img class="img-right" src="{{ asset('frontend/images/check-num-right.png') }}" alt="">
@@ -286,7 +289,7 @@
                 row-gap: 18px !important;
             }
         </style>
-    @endif
+    @endif --}}
 @endsection
 
 @push('scripts')

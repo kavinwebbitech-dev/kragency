@@ -13,6 +13,7 @@ class WalletTransactionLogModel extends Model
         'user_wallet_id',
         'type',
         'amount',
+        'bonus_amount',
         'description'
     ];
 }

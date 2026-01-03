@@ -48,6 +48,7 @@
                                             <th>Name</th>
                                             <th>Mobile</th>
                                             <th>Amount</th>
+                                            <th>Bonus Amount</th>
                                             <th>Date Created</th>
                                             <th>Action</th>
                                         </tr>
@@ -87,6 +88,10 @@
                     {
                         data: 'balance',
                         name: 'balance'
+                    },
+                    {
+                        data: 'bonus_amount',
+                        name: 'bonus_amount'
                     },
                     {
                         data: 'created_at',
