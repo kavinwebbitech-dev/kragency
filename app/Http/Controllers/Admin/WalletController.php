@@ -143,34 +143,92 @@ class WalletController extends Controller
         return view('admin.wallets.view_log', $data);
     }
 
-    public function deductAmount(Request $request) {
+    public function deductAmount(Request $request)
+    {
         if ($request->isMethod('post')) {
-            // Validation
-            $request->validate([
-                'amount'      => 'required|numeric|min:1',
+
+            // ✅ Validation
+            $rules = [
                 'customer_id' => 'required|exists:users,id',
                 'description' => 'nullable|string',
-            ]);
+            ];
 
+            if ($request->has('add_bonus')) {
+                $rules['bonus_amount'] = 'required|numeric|min:1';
+            } else {
+                $rules['amount'] = 'required|numeric|min:1';
+            }
+
+            $request->validate($rules);
+            
             DB::transaction(function () use ($request) {
-                // Retrieve wallet
-                $wallet = WalletModel::where('user_id', $request->customer_id)->first();
 
-                if (!$wallet || $wallet->balance < $request->amount) {
-                    throw new \Exception('Insufficient balance');
+                $wallet = WalletModel::where('user_id', $request->customer_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                // if (!$wallet) {
+                //     throw new \Exception('Wallet not found');
+                // }
+                  if (!$wallet) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->withErrors(['error' => 'Wallet not found']);
+                    }
+                if (!$request->has('add_bonus') && $wallet->balance < $request->amount) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['amount' => 'Insufficient main wallet balance']);
                 }
 
-                // Update balance atomically
-                $wallet->decrement('balance', $request->amount);
+                /** 🔵 BONUS WALLET CHECK */
+                if ($request->has('add_bonus') && $wallet->bonus_amount < $request->bonus_amount) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['bonus_amount' => 'Insufficient bonus wallet balance']);
+                }
+                /** 🔵 BONUS WALLET DEDUCT */
+                if ($request->has('add_bonus')) {
 
-                // Create transaction log
-                WalletTransactionLogModel::create([
-                    'user_id'        => $request->customer_id,
-                    'user_wallet_id' => $wallet->id,
-                    'type'           => 'debit',
-                    'amount'         => $request->amount,
-                    'description'    => $request->description,
-                ]);
+                    if ($wallet->bonus_amount < $request->bonus_amount) {
+                        throw new \Exception('Insufficient bonus balance');
+                    }
+
+                    $wallet->decrement('bonus_amount', $request->bonus_amount);
+
+                    WalletTransactionLogModel::create([
+                        'user_id'        => $request->customer_id,
+                        'user_wallet_id' => $wallet->id,
+                        'type'           => 'debit',
+                        'amount'         => 0,
+                        'bonus_amount'   => $request->bonus_amount,
+                        'wallet_type'    => 'bonus',
+                        'description'    => $request->description,
+                    ]);
+
+                } 
+                /** 🟢 MAIN WALLET DEDUCT */
+                else {
+
+                    if ($wallet->balance < $request->amount) {
+                        throw new \Exception('Insufficient balance');
+                    }
+
+                    $wallet->decrement('balance', $request->amount);
+
+                    WalletTransactionLogModel::create([
+                        'user_id'        => $request->customer_id,
+                        'user_wallet_id' => $wallet->id,
+                        'type'           => 'debit',
+                        'amount'         => $request->amount,
+                        'bonus_amount'   => 0,
+                        'wallet_type'    => 'main',
+                        'description'    => $request->description,
+                    ]);
+                }
             });
 
             return redirect()
@@ -178,7 +236,11 @@ class WalletController extends Controller
                 ->with('success', 'Amount deducted successfully');
         }
 
-        $data['customers'] = User::where('status', 1)->where('user_type', 'normal')->orderBy('id', 'desc')->get();
+        $data['customers'] = User::where('status', 1)
+            ->where('user_type', 'normal')
+            ->orderBy('id', 'desc')
+            ->get();
+
         return view('admin.wallets.deduct', $data);
     }
 }

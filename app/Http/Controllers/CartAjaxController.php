@@ -13,6 +13,7 @@ class CartAjaxController extends Controller
     {
         $userId = Auth::id();
         $cart = Session::get("lotteryCart.$userId", []);
+        $game = \App\Models\ScheduleProviderSlotTime::find($request->data['game_id']);
         $totalAmount = 0;
         $totalAmount += $request->input('total');
        /* foreach ($cart as $item) {
@@ -25,6 +26,11 @@ class CartAjaxController extends Controller
        // $addQty = $request->input('add_quantity', 1);
         //$totalAmount += $request->input('total');
         $hasBalance = WalletValidationService::hasSufficientBalance($userId, $totalAmount);
+        if($hasBalance == false){
+            if($game->getProvider->is_default == 0){
+                $hasBalance = WalletValidationService::hasSufficientBonusBalance($userId, $totalAmount);
+            }
+        }
         return response()->json([
             'success' => $hasBalance,
             'message' => $hasBalance ? 'Sufficient balance' : 'Insufficient balance',
