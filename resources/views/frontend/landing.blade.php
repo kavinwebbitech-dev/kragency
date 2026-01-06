@@ -135,9 +135,6 @@
 
                                             <h4 class="draw-card__title">
                                                 {{ $provider->name }}
-                                                @if ($provider->is_default == 1)
-                                                    <small class="text-success">(Default)</small>
-                                                @endif
                                             </h4>
 
                                             {{-- BUTTON AS DIV (NOT LINK) --}}

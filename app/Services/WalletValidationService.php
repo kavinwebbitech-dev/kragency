@@ -21,4 +21,12 @@ class WalletValidationService
         }
         return $user->wallet->balance >= $totalAmount;
     }
+    public static function hasSufficientBonusBalance($userId, $totalAmount)
+    {
+        $user = User::find($userId);
+        if (!$user || !$user->wallet) {
+            return false;
+        }
+        return $user->wallet->bonus_amount >= $totalAmount;
+    }
 }

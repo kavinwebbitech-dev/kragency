@@ -55,7 +55,14 @@
                             <span>₹{{ $user_detail?->wallet?->balance ?? 0 }}</span>
                         </div>
                     @endif
-
+                    {{-- Bonus --}}
+                    @if (Auth::check())
+                        <li class="nav-item d-flex align-items-center ml-3 wallet-ui">
+                            <i class="fas fa-gift mr-1"></i>
+                            <strong>{{ $user_detail?->wallet?->bonus_amount ?? 0 }}</strong>
+                        </li>
+                    @endif
+                    
                     {{-- USER --}}
                     @if (Auth::check())
                         <a href="#" class="icon-btn" data-toggle="offcanvas" data-target="#userOffcanvas">
@@ -106,7 +113,11 @@
                             <i class="fas fa-wallet mr-1"></i>
                             <strong>{{ $user_detail?->wallet?->balance ?? 0 }}</strong>
                         </li>
-
+                        {{-- Bonus --}}
+                        <li class="nav-item d-flex align-items-center ml-3 wallet-ui">
+                            <i class="fas fa-gift mr-1"></i>
+                            <strong>{{ $user_detail?->wallet?->bonus_amount ?? 0 }}</strong>
+                        </li>
 
                         {{-- CART DESKTOP --}}
                         <li class="nav-item ml-3">

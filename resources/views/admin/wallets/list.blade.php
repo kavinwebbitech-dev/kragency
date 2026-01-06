@@ -20,6 +20,12 @@
         </div>
         <div class="app-content">
             <div class="container-fluid">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card mb-4">

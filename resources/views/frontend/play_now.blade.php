@@ -264,7 +264,8 @@ $(document).ready(function () {
             method: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
-                total: newTotal
+                total: newTotal,
+                data : cartItem
             },
             success: function (response) {
 
