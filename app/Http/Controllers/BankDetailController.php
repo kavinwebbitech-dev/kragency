@@ -28,7 +28,7 @@ class BankDetailController extends Controller
         $userId = Auth::id();
 
         try {
-            // Create or update existing bank detail for the user
+            
             $bank = BankDetail::updateOrCreate(
                 ['user_id' => $userId],
                 [

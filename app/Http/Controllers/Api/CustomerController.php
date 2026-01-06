@@ -16,11 +16,30 @@ use App\Models\CustomerOrderItemModel;
 use App\Models\ScheduleProviderSlotTime;
 use App\Services\WalletValidationService;
 use Illuminate\Support\Facades\Session;
+use App\Models\CreateGameScheduleModel;
+use App\Models\Admin\SliderModel;
 
 class CustomerController extends Controller
 {
     /* ---------------- PUBLIC ---------------- */
+    public function index(Request $request)
+    {
+        $gameModel = new CreateGameScheduleModel();
 
+        $schedules = $gameModel->getGameSchedule()
+            ->sortByDesc('is_default')
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'current_time' => Carbon::now()->toDateTimeString(),
+            'default_provider' => $schedules->firstWhere('is_default', 1),
+            'schedules' => $schedules,
+            'sliders' => SliderModel::where('status', true)
+                ->orderBy('order')
+                ->get()
+        ]);
+    }
     public function results()
     {
         return response()->json([
@@ -45,28 +64,69 @@ class CustomerController extends Controller
         return $this->results();
     }
 
-    public function playGame($providerId, $timeId = null)
+    public function playGameApi($id, $time_id = null)
     {
-        $closeMinutes = CloseTime::value('minutes');
+        $gameModel = new CreateGameScheduleModel();
 
-        $slots = DB::table('schedule_providers_slot_time')
-            ->leftJoin('digit_master', 'digit_master.id', '=', 'schedule_providers_slot_time.digit_master_id')
-            ->leftJoin('provider_slots', 'provider_slots.id', '=', 'schedule_providers_slot_time.provider_slot_id')
-            ->where('schedule_providers_slot_time.betting_providers_id', $providerId)
-            ->when($timeId, fn($q) => $q->where('schedule_providers_slot_time.slot_time_id', $timeId))
-            ->whereDate('schedule_providers_slot_time.created_at', today())
+        $schedules = $gameModel->prepareGameData($id);
+
+        $closeMinutes = (int) CloseTime::pluck('minutes')->first();
+
+        $slots = CreateGameScheduleModel::with(['digitMaster', 'providerSlot'])
+            ->where('betting_providers_id', $id)
+            ->whereDate('created_at', today())
+            ->when(!is_null($time_id), function ($query) use ($time_id) {
+                $query->where('slot_time_id', $time_id);
+            })
             ->get();
 
+        $gameSlots = $slots->groupBy(function ($item) {
+            $digitType     = $item->digitMaster?->type ?? 'unknown';
+            $winningAmount = $item->providerSlot?->winning_amount ?? 0;
+            $amount        = $item->amount ?? 0;
+
+            return implode('_', [
+                $digitType,
+                $amount,
+                $winningAmount
+            ]);
+        });
+
+        $show_slot = 0;
+
+        foreach ($schedules as $schedule) {
+            if (
+                $schedule->betting_providers_id == $id &&
+                $time_id == $schedule->id
+            ) {
+                $scheduleTime = $schedule->time ?? $schedule->start_time ?? null;
+
+                if ($scheduleTime) {
+                    $scheduleDateTime = Carbon::parse($scheduleTime);
+                    $closeDateTime = $scheduleDateTime->copy()->subMinutes($closeMinutes);
+
+                    if (now()->lessThan($closeDateTime)) {
+                        $show_slot = 1;
+                    }
+                }
+            }
+        }
+
         return response()->json([
-            'success' => true,
-            'close_minutes' => $closeMinutes,
-            'data' => $slots
+            'success'        => true,
+            'close_minutes'  => $closeMinutes,
+            'slot_time_id'   => $time_id,
+            'show_slot'      => $show_slot,
+            'gameSlots'      => $gameSlots,
         ]);
     }
 
+
+
+
     /* ---------------- AUTH REQUIRED ---------------- */
 
-    public function index()
+    public function wallet()
     {
         $user = Auth::user();
 
@@ -185,6 +245,50 @@ class CustomerController extends Controller
         }
     }
 
+    // public function paymentHistory(Request $request)
+    // {
+    //     try {
+    //         $userId = Auth::id();
+
+    //         $perPage = $request->get('per_page', 10);
+    //         $currentPage = $request->get('page', 1);
+
+    //         $transactions = User::where('id', $userId)
+    //             ->firstOrFail()
+    //             ->walletTransactions()
+    //             ->orderByDesc('created_at')
+    //             ->paginate($perPage, ['*'], 'page', $currentPage);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'pagination' => [
+    //                 'current_page' => $transactions->currentPage(),
+    //                 'per_page' => $transactions->perPage(),
+    //                 'total' => $transactions->total(),
+    //                 'last_page' => $transactions->lastPage()
+    //             ],
+    //             'data' => $transactions->map(function ($txn) {
+    //                 return [
+    //                     // 'transaction_id' => $txn->id,
+    //                     'date' => $txn->created_at->format('Y-m-d H:i:s'),
+    //                     'type' => $txn->type,
+    //                     // 'balance' => $txn->balance,
+    //                     'description' => $txn->description,
+    //                     'amount' => $txn->amount,
+
+    //                 ];
+    //             })
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error($e->getMessage());
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve payment history'
+    //         ], 500);
+    //     }
+    // }
+
     public function paymentHistory(Request $request)
     {
         try {
@@ -193,29 +297,38 @@ class CustomerController extends Controller
             $perPage = $request->get('per_page', 10);
             $currentPage = $request->get('page', 1);
 
-            $transactions = User::where('id', $userId)
-                ->firstOrFail()
-                ->walletTransactions()
+            $user = User::findOrFail($userId);
+
+            $transactions = $user->walletTransactions()
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $currentPage);
 
+            // totals
+            $totalAmount = $user->walletTransactions()->sum('amount');
+
+            $bonusAmount = $user->walletTransactions()->sum('bonus_amount');
+
             return response()->json([
                 'success' => true,
+
+                'summary' => [
+                    'total_amount' => $totalAmount,
+                    'bonus_amount' => $bonusAmount
+                ],
+
                 'pagination' => [
                     'current_page' => $transactions->currentPage(),
-                    'per_page' => $transactions->perPage(),
-                    'total' => $transactions->total(),
-                    'last_page' => $transactions->lastPage()
+                    'per_page'     => $transactions->perPage(),
+                    'total'        => $transactions->total(),
+                    'last_page'    => $transactions->lastPage()
                 ],
+
                 'data' => $transactions->map(function ($txn) {
                     return [
-                        // 'transaction_id' => $txn->id,
-                        'date' => $txn->created_at->format('Y-m-d H:i:s'),
-                        'type' => $txn->type,
-                        // 'balance' => $txn->balance,
+                        'date'        => $txn->created_at->format('Y-m-d H:i:s'),
+                        'type'        => $txn->type,
                         'description' => $txn->description,
-                        'amount' => $txn->amount,
-
+                        'amount'      => $txn->amount
                     ];
                 })
             ]);
@@ -246,16 +359,42 @@ class CustomerController extends Controller
                 'customer_order_items.digits as entered_digit',
                 'customer_order_items.quantity as quantity',
                 'customer_order_items.amount as price',
-                'customer_order_items.win_status as winning_status'
+                'customer_order_items.win_status as winning_status','customer_orders.user_id as user_id'
             ])
             ->get();
-
+                // dd($results);
         return response()->json([
             'success' => true,
             'data' => $results
         ]);
     }
+    public function addToCart(Request $request)
+    {
+        $request->validate([
+            'item.provider_id'    => 'required|integer',
+            'item.slot_time_id'   => 'required|integer',
+            'item.game_type'      => 'required|string',
+            'item.digit_type'     => 'required|string',
+            'item.digits'         => 'required|string',
+            'item.quantity'       => 'required|integer|min:1',
+            'item.amount'         => 'required|numeric',
+            'item.winning_amount' => 'required|numeric',
+        ]);
 
+        $userId = Auth::id();
+        $item = $request->item;
+
+        $cart = Session::get("lotteryCart.$userId", []);
+        $cart[] = $item;
+
+        Session::put("lotteryCart.$userId", $cart);
+
+        return response()->json([
+            'success' => true,
+            'cart_count' => count($cart),
+            'cart' => $cart
+        ]);
+    }
 
     public function removeFromCart(Request $request)
     {
@@ -283,6 +422,20 @@ class CustomerController extends Controller
         return response()->json([
             'success' => true,
             'cart' => $cart
+        ]);
+    }
+    public function profile()
+    {
+        $user = Auth::user();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'name'         => $user->name,
+                'mobile'       => $user->mobile,
+                'wallet_balance' => $user->wallet?->balance ?? 0,
+                'bonus_amount' => $user->wallet?->bonus_amount ?? 0,
+                'order_count'  => CustomerOrder::where('user_id', $user->id)->count(),
+            ]
         ]);
     }
 }

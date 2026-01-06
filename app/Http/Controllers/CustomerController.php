@@ -22,7 +22,7 @@ class CustomerController extends Controller
 
     public function index(Request $request): View
     {
-
+    
         $gameModel = new CreateGameScheduleModel();
         
         $data['schedules'] = $gameModel->getGameSchedule()
