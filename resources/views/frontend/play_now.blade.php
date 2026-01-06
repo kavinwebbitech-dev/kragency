@@ -287,7 +287,7 @@ $(document).ready(function () {
                     success: function (res) {
                         if (res.success) {
                             cart = res.cart;
-                            $('#cartCount').text(cart.length);
+                            $('.cartCount').text(cart.length);
 
                             Swal.fire({
                                 icon: 'success',
