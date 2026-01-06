@@ -23,7 +23,7 @@ Route::prefix('customer')->group(function () {
         Route::get('wallet', [CustomerController::class, 'wallet']);
         Route::get('viewcart', [CustomerController::class, 'viewcart']);
         Route::post('cart-add', [CustomerController::class, 'addToCart']);
-        Route::get('cart', [CustomerController::class, 'getCart']);
+        Route::get('getcart', [CustomerController::class, 'getCart']);
         Route::post('cart-remove', [CustomerController::class, 'removeFromCart']);
         Route::post('place-order', [CustomerController::class, 'placeOrder']);
         Route::get('orders-history', [CustomerController::class, 'customerOrderDetails']);
