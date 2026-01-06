@@ -14,6 +14,8 @@ class CustomerOrdersModel extends Model
         'opening_balance',
         'closing_balance',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'bonus_opening_balance',
+        'bonus_closing_balance'
     ];
 }
