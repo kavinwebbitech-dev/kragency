@@ -37,7 +37,7 @@
                     {{-- CART --}}
                     <a href="{{ route('lottery.view.cart') }}" class="icon-btn position-relative">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="badge badge-danger cart-badge">
+                        <span class="badge badge-danger cart-badge cartCount">
                               {{ count(session('lotteryCart.' . auth()->id(), [])) }}
                         </span>
                     </a>
@@ -123,7 +123,7 @@
                         <li class="nav-item ml-3">
                             <a href="{{ route('lottery.view.cart') }}" class="nav-link position-relative">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="badge badge-danger cart-badge">
+                                <span class="badge badge-danger cart-badge cartCount">
                                     {{ count(session('lotteryCart.' . auth()->id(), [])) }}
                                 </span>
                             </a>
@@ -231,6 +231,12 @@
                 <li class="wallet-info">
                     <i class="fas fa-wallet"></i>
                     <span>Wallet Balance: <strong>₹{{ $user_detail?->wallet?->balance ?? 0 }}</strong></span>
+                </li>
+            @endif
+            @if (Auth::check())
+                <li class="wallet-info">
+                    <i class="fas fa-wallet"></i>
+                    <span>Bonus Balance: <strong>₹{{ $user_detail?->wallet?->bonus_amount ?? 0 }}</strong></span>
                 </li>
             @endif
         </ul>
