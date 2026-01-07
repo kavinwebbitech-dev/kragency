@@ -17,7 +17,8 @@ class WithdrawController extends Controller
 
         return response()->json([
             'success' => true,
-            'balance' => $wallet?->balance ?? 0,
+            'wallet_balance' => $wallet?->balance ?? 0,
+            'bonus_balance' => $wallet?->bonus_amount ?? 0,
             'min_withdraw' => 500
         ]);
     }

@@ -354,52 +354,77 @@ class CustomerController extends Controller
     }
     public function customerOrderDetails(Request $request)
     {
-        try {
-            $userId = Auth::id();
+        $perPage = $request->get('per_page', 10);
 
-            $perPage = $request->get('per_page', 10);
-            $currentPage = $request->get('page', 1);
+        $rows = DB::table('customer_orders')
+            ->leftJoin('customer_order_items', 'customer_orders.id', '=', 'customer_order_items.order_id')
+            ->leftJoin('schedule_providers_slot_time', 'schedule_providers_slot_time.id', '=', 'customer_order_items.game_id')
+            ->leftJoin('digit_master', 'digit_master.id', '=', 'schedule_providers_slot_time.digit_master_id')
+            ->leftJoin('betting_providers', 'betting_providers.id', '=', 'schedule_providers_slot_time.betting_providers_id')
+            ->where('customer_orders.user_id', Auth::id())
+            ->orderByDesc('customer_orders.created_at')
+            ->select([
+                'customer_orders.id as order_id',
+                'customer_orders.total_amount',
+                'customer_orders.opening_balance',
+                'customer_orders.closing_balance',
+                'customer_orders.bonus_opening_balance',
+                'customer_orders.bonus_closing_balance',
+                'customer_orders.created_at as order_date',
 
-            $orders = DB::table('customer_orders')
-                ->leftJoin('customer_order_items', 'customer_orders.id', '=', 'customer_order_items.order_id')
-                ->leftJoin('schedule_providers_slot_time', 'schedule_providers_slot_time.id', '=', 'customer_order_items.game_id')
-                ->leftJoin('digit_master', 'digit_master.id', '=', 'schedule_providers_slot_time.digit_master_id')
-                ->leftJoin('betting_providers', 'betting_providers.id', '=', 'schedule_providers_slot_time.betting_providers_id')
-                ->where('customer_orders.user_id', $userId)
-                ->orderByDesc('customer_orders.created_at')
-                ->select([
-                    'customer_orders.id as id',
-                    'customer_orders.created_at as order_date',
-                    'betting_providers.name as provider',
-                    'schedule_providers_slot_time.slot_time as time',
-                    'digit_master.name as digit',
-                    'customer_order_items.digits as entered_digit',
-                    'customer_order_items.quantity as quantity',
-                    'customer_order_items.amount as price',
-                    'customer_order_items.win_amount as winning_status',
-                ])
-                ->paginate($perPage, ['*'], 'page', $currentPage);
+                'customer_order_items.id as order_item_id',
+                'customer_order_items.digits',
+                'customer_order_items.quantity',
+                'customer_order_items.amount',
+                'customer_order_items.win_amount',
+                'customer_order_items.win_status',
 
-            return response()->json([
-                'success' => true,
+                'schedule_providers_slot_time.slot_time',
+                'betting_providers.name as provider_name',
+                'digit_master.name as game_digits'
+            ])
+            ->paginate($perPage);
 
-                'pagination' => [
-                    'current_page' => $orders->currentPage(),
-                    'per_page'     => $orders->perPage(),
-                    'total'        => $orders->total(),
-                    'last_page'    => $orders->lastPage()
-                ],
+        // ✅ GROUP BY ORDER ID
+        $grouped = collect($rows->items())
+            ->groupBy('order_id')
+            ->map(function ($items) {
+                $first = $items->first();
 
-                'data' => $orders->items()
-            ]);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
+                return [
+                    'order_id' => $first->order_id,
+                    'order_date' => $first->order_date,
+                    'total_amount' => $first->total_amount,
+                    'opening_balance' => $first->opening_balance,
+                    'closing_balance' => $first->closing_balance,
+                    'bonus_opening_balance' => $first->bonus_opening_balance,
+                    'bonus_closing_balance' => $first->bonus_closing_balance,
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve order history'
-            ], 500);
-        }
+                    'items' => $items->map(function ($item) {
+                        return [
+                            'provider' => $item->provider_name,
+                            'slot_time' => $item->slot_time,
+                            'digit_type' => $item->game_digits,
+                            'entered_digit' => $item->digits,
+                            'quantity' => $item->quantity,
+                            'amount' => $item->amount,
+                            'win_amount' => $item->win_amount,
+                            'win_status' => $item->win_status
+                        ];
+                    })->values()
+                ];
+            })->values();
+
+        return response()->json([
+            'success' => true,
+            'pagination' => [
+                'current_page' => $rows->currentPage(),
+                'per_page' => $rows->perPage(),
+                'total' => $rows->total(),
+                'last_page' => $rows->lastPage(),
+            ],
+            'data' => $grouped
+        ]);
     }
     public function addToCart(Request $request)
     {
@@ -466,8 +491,20 @@ class CustomerController extends Controller
                 'name'         => $user->name,
                 'mobile'       => $user->mobile,
                 'wallet_balance' => $user->wallet?->balance ?? 0,
-                'bonus_amount' => $user->wallet?->bonus_amount ?? 0,
+                'bonus_balance' => $user->wallet?->bonus_amount ?? 0,
                 'order_count'  => CustomerOrder::where('user_id', $user->id)->count(),
+            ]
+        ]);
+    }
+    public function walletBonusBalance()
+    {
+        $user = Auth::user();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'wallet_balance' => $user->wallet?->balance ?? 0,
+                'bonus_balance'  => $user->wallet?->bonus_amount ?? 0
             ]
         ]);
     }

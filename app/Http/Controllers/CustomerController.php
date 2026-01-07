@@ -460,7 +460,7 @@ class CustomerController extends Controller
             ->where('customer_orders.user_id', Auth::id())
             ->orderBy('customer_orders.created_at', 'desc')
             ->get();
-
+            
         return view('frontend.customer-order-details', $data);
     }
 }
