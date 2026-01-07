@@ -431,10 +431,29 @@ class CustomerController extends Controller
             ->leftJoin('digit_master', 'digit_master.id', '=', 'schedule_providers_slot_time.digit_master_id')
             ->leftJoin('betting_providers', 'betting_providers.id', '=', 'schedule_providers_slot_time.betting_providers_id')
             ->select(
-                'customer_orders.*',
-                'customer_order_items.*',
+                // ORDER
+                'customer_orders.id as order_id',
+                'customer_orders.total_amount',
+                'customer_orders.opening_balance',
+                'customer_orders.closing_balance',
+                'customer_orders.bonus_opening_balance',
+                'customer_orders.bonus_closing_balance',
+                'customer_orders.created_at as order_created_at',
+
+                // ORDER ITEMS
+                'customer_order_items.id as order_item_id',
+                'customer_order_items.game_id',
+                'customer_order_items.digits',
+                'customer_order_items.quantity',
                 'customer_order_items.amount as particular_slot_amount',
-                'schedule_providers_slot_time.*',
+                'customer_order_items.win_amount',              // ✅ ADD THIS
+                'customer_order_items.win_status',               // (optional)
+                'customer_order_items.created_at as order_item_created_at',
+
+                // SLOT
+                'schedule_providers_slot_time.slot_time',
+
+                // PROVIDER & GAME
                 'betting_providers.name as provider_name',
                 'digit_master.name as game_digits'
             )

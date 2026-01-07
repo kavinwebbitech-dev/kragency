@@ -150,7 +150,7 @@
                                 @foreach($results as $key => $result)
                                     <tr>
                                         <td class="receipt-cell">{{ $key + 1 }}</td>
-                                        <td class="receipt-cell">{{ \Carbon\Carbon::parse($result->created_at)->format('M d, Y h:i A') }}</td>
+                                        <td class="receipt-cell">{{ \Carbon\Carbon::parse($result->order_created_at)->format('M d, Y h:i A') }}</td>
                                         <td class="receipt-cell">{{ $result->provider_name }}</td>
                                         <td class="receipt-cell">
                                             @if($result->slot_time)
@@ -163,7 +163,9 @@
                                         <td class="receipt-cell">{{ $result->digits }}</td>
                                         <td class="receipt-cell">{{ $result->quantity }}</td>
                                         <td class="receipt-cell">{{ $result->particular_slot_amount }}</td>
-                                        <td class="receipt-cell">{{ $result->win_amount }}</td>
+                                        <td class="receipt-cell">
+                                            {{ $result->win_amount !== null ? number_format($result->win_amount, 2) : '-' }}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
