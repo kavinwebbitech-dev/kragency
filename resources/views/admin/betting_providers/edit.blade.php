@@ -73,7 +73,7 @@
                                         {{-- Show existing image if available --}}
                                         @if($provider->image)
                                             <div class="mb-2">
-                                                <img src="{{ asset('../storage/app/public/' . $provider->image) }}" 
+                                                <img src="{{ asset('storage/' . $provider->image) }}" 
                                                     alt="Provider Image" 
                                                     class="img-thumbnail" 
                                                     style="max-width: 150px; height: auto;">

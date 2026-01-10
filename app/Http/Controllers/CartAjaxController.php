@@ -10,10 +10,12 @@ use App\Services\WalletValidationService;
 class CartAjaxController extends Controller
 {
     public function checkWallet(Request $request)
-    {
+    {   
         $userId = Auth::id();
         $cart = Session::get("lotteryCart.$userId", []);
 
+        // dd($cart,$request->all());
+        
         $walletTotal = 0; // all games
         $bonusTotal  = 0; // only is_default games
 

@@ -21,6 +21,7 @@ Route::prefix('customer')->group(function () {
         Route::post('logout', [AuthenticatedSessionController::class, 'logout']);
         Route::get('profile', [CustomerController::class, 'profile']);
         Route::get('wallet', [CustomerController::class, 'wallet']);
+        Route::post('check-wallet',[CustomerController::class, 'checkWallet']);  
         Route::get('wallet-bonus-balance', [CustomerController::class, 'walletBonusBalance']);
         Route::get('viewcart', [CustomerController::class, 'viewcart']);
         Route::post('cart-add', [CustomerController::class, 'addToCart']);

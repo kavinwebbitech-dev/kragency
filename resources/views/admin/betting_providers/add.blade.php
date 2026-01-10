@@ -121,7 +121,7 @@
                                                 <button type="button" class="btn btn-danger remove-slot" style="display:none;">&times;</button>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-success btn-sm mt-2" id="add-slot">+ Add Slot</button>
+                                        <button type="button" class="btn btn-success btn-sm mt-2" id="add-slot">+sdd Add Slot</button>
                                     </div>
                                 </div>
 
