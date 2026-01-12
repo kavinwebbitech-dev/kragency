@@ -10,39 +10,33 @@ use App\Services\WalletValidationService;
 class CartAjaxController extends Controller
 {
     public function checkWallet(Request $request)
-    {   
+    {
         $userId = Auth::id();
         $cart = Session::get("lotteryCart.$userId", []);
 
-        // dd($cart,$request->all());
-        
-        $walletTotal = 0; // all games
-        $bonusTotal  = 0; // only is_default games
+        $walletTotal = 0; // non-default
+        $bonusTotal  = 0; // default
 
-        // 1️⃣ Calculate totals from cart
+        // 1️⃣ Cart items
         foreach ($cart as $item) {
 
             $game = \App\Models\ScheduleProviderSlotTime::with('getProvider')
                 ->find($item['game_id']);
 
-            if (!$game || !$game->getProvider) {
-                continue;
-            }
+            if (!$game || !$game->getProvider) continue;
 
             $qty = (int) ($item['quantity'] ?? 1);
             $amt = (float) ($item['amount'] ?? 0);
-            $itemTotal = $qty * $amt;
+            $total = $qty * $amt;
 
-            // bonus ONLY for default games
             if ($game->getProvider->is_default == 1) {
-                $bonusTotal += $itemTotal;
-            }else{
-                // wallet includes everything
-                $walletTotal += $itemTotal;
+                $bonusTotal += $total;
+            } else {
+                $walletTotal += $total;
             }
         }
 
-        // 2️⃣ Add current request item
+        // 2️⃣ Current item
         if (!empty($request->data)) {
 
             $game = \App\Models\ScheduleProviderSlotTime::with('getProvider')
@@ -57,42 +51,41 @@ class CartAjaxController extends Controller
 
             $qty = (int) ($request->data['quantity'] ?? 1);
             $amt = (float) ($request->data['amount'] ?? 0);
-            $itemTotal = $qty * $amt;
+            $total = $qty * $amt;
 
-            // always added to wallet requirement
-            // bonus only if default game
             if ($game->getProvider->is_default == 1) {
-                $bonusTotal += $itemTotal;
-            }else{
-                $walletTotal += $itemTotal;
+                $bonusTotal += $total;
+            } else {
+                $walletTotal += $total;
             }
-
         }
-        $walletTotal += $bonusTotal;
-        // 3️⃣ MAIN wallet check (FULL amount)
-        if (WalletValidationService::hasSufficientBalance($userId, $walletTotal)) {
+
+        // 3️⃣ Fetch balances
+        $bonusBalance  = WalletValidationService::getBonusBalance($userId);
+        $walletBalance = WalletValidationService::getWalletBalance($userId);
+
+        // 4️⃣ Use bonus first
+        $bonusUsed = min($bonusBalance, $bonusTotal);
+        $remainingBonusAmount = $bonusTotal - $bonusUsed;
+
+        // 5️⃣ Wallet pays:
+        // - non-default items
+        // - remaining default items (if bonus insufficient)
+        $walletRequired = $walletTotal + $remainingBonusAmount;
+
+        if ($walletBalance < $walletRequired) {
             return response()->json([
-                'success' => true,
-                'message' => 'Sufficient wallet balance'
+                'success' => false,
+                'message' => 'Insufficient balance'
             ]);
         }
 
-        // 4️⃣ BONUS check (ONLY default game amount)
-        if ($bonusTotal > 0 && $game->getProvider->is_default == 1 &&
-            WalletValidationService::hasSufficientBonusBalance($userId, $bonusTotal)
-        ) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Using bonus for default games'
-            ]);
-        }
-
-        // ❌ Not enough
         return response()->json([
-            'success' => false,
-            'message' => 'Insufficient balance'
+            'success' => true,
+            'message' => 'Sufficient balance'
         ]);
     }
+
     
     // public function checkWallet(Request $request)
     // {

@@ -100,40 +100,31 @@ class CustomerController extends Controller
             }
 
             /** -----------------------------
-             *  FILTER CLOSED SLOTS
-             *  -----------------------------
-             */
-            $closeMinutes = \App\Models\CloseTime::pluck('minutes')->first();
+             * FILTER CLOSED SLOTS
+             * ----------------------------- */
+            $closeMinutes = \App\Models\CloseTime::value('minutes');
             $now = now();
-            $validCart = [];
 
-            foreach ($cart as $item) {
-                $game = \App\Models\ScheduleProviderSlotTime::with('getProvider')
-                    ->find($item['game_id']);
+            $validCart = collect($cart)->filter(function ($item) use ($closeMinutes, $now) {
+                $game = \App\Models\ScheduleProviderSlotTime::find($item['game_id']);
+                if (!$game) return false;
 
-                if (!$game) continue;
-
-                $closeTime = \Carbon\Carbon::parse($game->slot_time)
-                    ->subMinutes($closeMinutes);
-
-                if ($now->lt($closeTime)) {
-                    $validCart[] = $item;
-                }
-            }
+                return $now->lt(
+                    \Carbon\Carbon::parse($game->slot_time)->subMinutes($closeMinutes)
+                );
+            })->values()->toArray();
 
             if (empty($validCart)) {
                 return response()->json(['success' => false, 'message' => 'All slots closed']);
             }
 
             /** -----------------------------
-             *  SPLIT CART
-             *  -----------------------------
-             */
-            $defaultItems = [];
-            $nonDefaultItems = [];
-
+             * SPLIT TOTALS
+             * ----------------------------- */
             $defaultTotal = 0;
             $nonDefaultTotal = 0;
+            $defaultItems = [];
+            $nonDefaultItems = [];
 
             foreach ($validCart as $item) {
                 $game = \App\Models\ScheduleProviderSlotTime::with('getProvider')
@@ -144,76 +135,78 @@ class CustomerController extends Controller
                 $total = $item['quantity'] * $item['amount'];
 
                 if ($game->getProvider->is_default == 1) {
-                    $defaultItems[] = $item;
                     $defaultTotal += $total;
+                    $defaultItems[] = $item;
                 } else {
-                    $nonDefaultItems[] = $item;
                     $nonDefaultTotal += $total;
+                    $nonDefaultItems[] = $item;
                 }
             }
 
-            $user = \App\Models\User::find($userId);
+            /** -----------------------------
+             * WALLET & BONUS (CORRECT RULE)
+             * ----------------------------- */
+            $user = \App\Models\User::findOrFail($userId);
             $wallet = $user->wallet;
 
-            /** -----------------------------
-             *  PAYMENT LOGIC
-             *  -----------------------------
+            $openingWallet = $wallet->balance;
+            $openingBonus  = $wallet->bonus_amount;
+
+            /**
+             * STEP 1: Non-default MUST be paid by wallet
              */
-            $paidItems = [];
-
-            // 1️⃣ MAIN WALLET FIRST
-            if ($wallet->balance >= ($defaultTotal + $nonDefaultTotal)) {
-
-                $wallet->balance -= ($defaultTotal + $nonDefaultTotal);
-                $paidItems = $validCart;
+            if ($openingWallet < $nonDefaultTotal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient wallet balance for non-default games'
+                ]);
             }
-            else {
-                // MAIN wallet pays what it can
-                $remainingMain = $wallet->balance;
-                $wallet->balance = 0;
 
-                // MAIN wallet pays NON-DEFAULT first
-                if ($remainingMain >= $nonDefaultTotal) {
-                    $remainingMain -= $nonDefaultTotal;
-                    $paidItems = $nonDefaultItems;
-                } else {
+            /**
+             * STEP 2: Wallet tries to pay default
+             */
+            $walletAfterNonDefault = $openingWallet - $nonDefaultTotal;
+
+            if ($walletAfterNonDefault >= $defaultTotal) {
+                // Wallet alone is enough
+                $walletUsed = $nonDefaultTotal + $defaultTotal;
+                $bonusUsed  = 0;
+            } else {
+                // Wallet insufficient → use bonus (ONLY for default)
+                $remainingDefault = $defaultTotal - $walletAfterNonDefault;
+
+                if ($openingBonus < $remainingDefault) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Insufficient wallet balance'
+                        'message' => 'Insufficient bonus balance for default games'
                     ]);
                 }
 
-                // BONUS for DEFAULT
-                if ($wallet->bonus_amount >= $defaultTotal) {
-                    $wallet->bonus_amount -= $defaultTotal;
-                    $paidItems = array_merge($paidItems, $defaultItems);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Insufficient bonus balance'
-                    ]);
-                }
+                $walletUsed = $openingWallet; // all wallet consumed
+                $bonusUsed  = $remainingDefault;
             }
+
+            /**
+             * STEP 3: Deduct balances
+             */
+            $wallet->balance -= $walletUsed;
+            $wallet->bonus_amount -= $bonusUsed;
+            $wallet->save();
 
             /** -----------------------------
-             *  CREATE ORDER
-             *  -----------------------------
-            */
-            
-            $mainClosingBalance  = $wallet->balance;       // already deducted above
-            $bonusClosingBalance = $wallet->bonus_amount;  // already deducted above
-
+             * CREATE ORDER
+             * ----------------------------- */
             $order = CustomerOrdersModel::create([
-                'user_id'                => $userId,
-                'total_amount'           => $defaultTotal + $nonDefaultTotal,
-                'status'                 => 'pending',
-                'opening_balance'        => $wallet->balance + $nonDefaultTotal,  // add back what was deducted for clarity
-                'closing_balance'        => $mainClosingBalance,
-                'bonus_opening_balance'  => $wallet->bonus_amount + $defaultTotal, // add back what was deducted
-                'bonus_closing_balance'  => $bonusClosingBalance,
+                'user_id'               => $userId,
+                'total_amount'          => $defaultTotal + $nonDefaultTotal,
+                'status'                => 'pending',
+                'opening_balance'       => $openingWallet,
+                'closing_balance'       => $wallet->balance,
+                'bonus_opening_balance' => $openingBonus,
+                'bonus_closing_balance' => $wallet->bonus_amount,
             ]);
 
-            foreach ($paidItems as $item) {
+            foreach ($validCart as $item) {
                 CustomerOrderItemModel::create([
                     'order_id' => $order->id,
                     'game_id'  => $item['game_id'],
@@ -223,29 +216,11 @@ class CustomerController extends Controller
                 ]);
             }
 
-            $wallet->save();
-
-            /** -----------------------------
-             *  REMOVE ONLY PAID ITEMS
-             *  -----------------------------
-             */
-            $remainingCart = [];
-
-            foreach ($validCart as $item) {
-                $paid = collect($paidItems)->contains(
-                    fn ($p) => $p['game_id'] == $item['game_id']
-                );
-
-                if (!$paid) {
-                    $remainingCart[] = $item;
-                }
-            }
-
-            Session::put("lotteryCart.$userId", $remainingCart);
+            Session::forget("lotteryCart.$userId");
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order placed successfully',
+                'success'  => true,
+                'message'  => 'Order placed successfully',
                 'order_id' => $order->id
             ]);
 
@@ -256,6 +231,7 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
 
     public function paymentHistory(Request $request)
     {

@@ -13,20 +13,25 @@ class WalletValidationService
      * @param float $totalAmount
      * @return bool
      */
-    public static function hasSufficientBalance($userId, $totalAmount)
+    public static function getWalletBalance($userId)
     {
         $user = User::find($userId);
-        if (!$user || !$user->wallet) {
-            return false;
-        }
-        return $user->wallet->balance >= $totalAmount;
+        return ($user && $user->wallet) ? (float)$user->wallet->balance : 0;
     }
-    public static function hasSufficientBonusBalance($userId, $totalAmount)
+
+    public static function getBonusBalance($userId)
     {
         $user = User::find($userId);
-        if (!$user || !$user->wallet) {
-            return false;
-        }
-        return $user->wallet->bonus_amount >= $totalAmount;
+        return ($user && $user->wallet) ? (float)$user->wallet->bonus_amount : 0;
+    }
+
+    public static function hasSufficientBalance($userId, $amount)
+    {
+        return self::getWalletBalance($userId) >= $amount;
+    }
+
+    public static function hasSufficientBonusBalance($userId, $amount)
+    {
+        return self::getBonusBalance($userId) >= $amount;
     }
 }
