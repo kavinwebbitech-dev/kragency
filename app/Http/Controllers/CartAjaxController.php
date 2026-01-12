@@ -33,12 +33,12 @@ class CartAjaxController extends Controller
             $amt = (float) ($item['amount'] ?? 0);
             $itemTotal = $qty * $amt;
 
-            // wallet includes everything
-            $walletTotal += $itemTotal;
-
             // bonus ONLY for default games
             if ($game->getProvider->is_default == 1) {
                 $bonusTotal += $itemTotal;
+            }else{
+                // wallet includes everything
+                $walletTotal += $itemTotal;
             }
         }
 
@@ -60,12 +60,13 @@ class CartAjaxController extends Controller
             $itemTotal = $qty * $amt;
 
             // always added to wallet requirement
-            $walletTotal += $itemTotal;
-
             // bonus only if default game
             if ($game->getProvider->is_default == 1) {
                 $bonusTotal += $itemTotal;
+            }else{
+                $walletTotal += $itemTotal;
             }
+
         }
         $walletTotal += $bonusTotal;
         // 3️⃣ MAIN wallet check (FULL amount)
