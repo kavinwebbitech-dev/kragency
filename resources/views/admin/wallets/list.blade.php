@@ -56,6 +56,7 @@
                                             <th>Amount</th>
                                             <th>Bonus Amount</th>
                                             <th>Date Created</th>
+                                            <th>Updated By</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -102,6 +103,10 @@
                     {
                         data: 'created_at',
                         name: 'created_at'
+                    },
+                    {
+                        data: 'created_by',
+                        name: 'created_by'
                     },
                     {
                         data: null,

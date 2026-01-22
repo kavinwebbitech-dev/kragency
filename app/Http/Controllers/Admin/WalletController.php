@@ -22,7 +22,7 @@ class WalletController extends Controller
         if ($request->ajax()) {
             $wallets = WalletModel::with(['user' => function($query) {
                 $query->whereNull('deleted_at');
-            }])
+            }],'userDetail')
             ->whereHas('user', function($query) {
                 $query->whereNull('deleted_at');
             })->orderBy((new WalletModel)->getTable() . '.updated_at', 'desc')->get();
@@ -36,6 +36,9 @@ class WalletController extends Controller
                 })
                 ->addColumn('created_at', function($wallet) {
                     return $wallet->created_at->format('Y-m-d H:i'); // format as needed
+                })
+                ->addColumn('created_by', function($wallet) {
+                    return $wallet->userDetail->name ?? '-'; // format as needed
                 })
                 ->make(true);
         }
@@ -64,33 +67,35 @@ class WalletController extends Controller
                 // Get or create wallet
                 $wallet = WalletModel::firstOrCreate(
                     ['user_id' => $request->customer_id],
-                    ['balance' => 0, 'bonus_amount' => 0]
+                    ['balance' => 0, 'bonus_amount' => 0],
                 );
 
                 if ($request->has('add_bonus')) {
 
                     // ✅ Add BONUS only
                     $wallet->increment('bonus_amount', $request->bonus_amount);
-
+                    $wallet->update(['created_by' => auth()->id()]);
                     WalletTransactionLogModel::create([
                         'user_id'        => $request->customer_id,
                         'user_wallet_id' => $wallet->id,
                         'type'           => 'credit',
                         'amount'         => $request->bonus_amount,
                         'description'    => $request->description,
+                        'created_by'     => auth()->id(),
                     ]);
 
                 } else {
 
                     // ✅ Add NORMAL amount
                     $wallet->increment('balance', $request->amount);
-
-                    WalletTransactionLogModel::create([
+                    $wallet->update(['created_by' => auth()->id()]);
+                    $tet = WalletTransactionLogModel::create([
                         'user_id'        => $request->customer_id,
                         'user_wallet_id' => $wallet->id,
                         'type'           => 'credit',
                         'amount'         => $request->amount,
                         'description'    => $request->description,
+                        'created_by'     => auth()->id(),
                     ]);
                 }
             });
@@ -113,6 +118,9 @@ class WalletController extends Controller
             return DataTables::of($transactionLog)
                 ->editColumn('created_at', function ($row) {
                     return $row->created_at->format('d-m-Y h:i A');
+                })
+                ->addColumn('created_by', function($wallet) {
+                    return $wallet->userDetail->name ?? '-';
                 })->make(true);
         }
         return view('admin.wallets.view_log', $data);
@@ -196,9 +204,9 @@ class WalletController extends Controller
                     if ($wallet->bonus_amount < $request->bonus_amount) {
                         throw new \Exception('Insufficient bonus balance');
                     }
-
+                    
                     $wallet->decrement('bonus_amount', $request->bonus_amount);
-
+                    $wallet->update(['created_by' => auth()->id()]);
                     WalletTransactionLogModel::create([
                         'user_id'        => $request->customer_id,
                         'user_wallet_id' => $wallet->id,
@@ -207,6 +215,7 @@ class WalletController extends Controller
                         'bonus_amount'   => $request->bonus_amount,
                         'wallet_type'    => 'bonus',
                         'description'    => $request->description,
+                        'created_by'     => auth()->id(),
                     ]);
 
                 } 
@@ -218,7 +227,7 @@ class WalletController extends Controller
                     }
 
                     $wallet->decrement('balance', $request->amount);
-
+                    $wallet->update(['created_by' => auth()->id()]);
                     WalletTransactionLogModel::create([
                         'user_id'        => $request->customer_id,
                         'user_wallet_id' => $wallet->id,
@@ -227,6 +236,7 @@ class WalletController extends Controller
                         'bonus_amount'   => 0,
                         'wallet_type'    => 'main',
                         'description'    => $request->description,
+                        'created_by'     => auth()->id(),
                     ]);
                 }
             });

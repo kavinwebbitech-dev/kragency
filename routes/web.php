@@ -77,6 +77,13 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::get('/admin/view-transaction/{user}', [UserController::class, 'viewTransaction'])->name('admin.view-transaction');
     Route::get('/admin/get-users-transaction/{user}', [UserController::class, 'getTransactionData'])->name('admin.users.get-transaction');
 
+    //change password
+    Route::get('change-password', [UserController::class, 'editPassword'])
+        ->name('admin.change-password.edit');
+
+    Route::post('change-password', [UserController::class, 'updatePassword'])
+        ->name('admin.change-password.update');
+
     Route::get('/admin/subadmin', [SubAdminController::class, 'index'])
         ->name('admin.subadmin.index');
 

@@ -7,7 +7,7 @@
     <div class="sidebar-brand">
         <a href="{{ route('admin.dashboard') }}" class="brand-link">
             <img src="{{ asset('admin/img/AdminLTELogo.png') }}" class="brand-image opacity-75 shadow" />
-            <span class="brand-text fw-light">kragency</span>
+            <span class="brand-text fw-light">Kumaranbooking</span>
         </a>
     </div>
 
@@ -53,6 +53,12 @@
                         <a href="{{ route('admin.wallet.index') }}" class="nav-link">
                             <i class="nav-icon bi bi-wallet2"></i>
                             <p>Wallet</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.wallet.index') }}" class="nav-link">
+                            <i class="nav-icon bi bi-wallet2"></i>
+                            <p>Wallet History</p>
                         </a>
                     </li>
 
@@ -140,6 +146,13 @@
                                     class="nav-link {{ Route::is('admin.close-time.*') ? 'active' : '' }}">
                                     <i class="nav-icon bi bi-clock"></i>
                                     <p>Close Time</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.change-password.edit') }}"
+                                    class="nav-link {{ Route::is('admin.change-password.*') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-lock-fill"></i>
+                                    <p>Change Password</p>
                                 </a>
                             </li>
                         </ul>

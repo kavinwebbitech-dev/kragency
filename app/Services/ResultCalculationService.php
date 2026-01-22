@@ -25,7 +25,7 @@ class ResultCalculationService
                 $q->where('schedule_provider_id', $providerId)
                 ->where('betting_providers_id', $providerDetails->betting_providers_id)
                 ->whereDate('created_at', now()->toDateString())
-                ->select('id', 'digit_master_id','slot_id');
+                ->select('id','betting_providers_id','digit_master_id','slot_id');
             }])
             ->whereHas('scheduleProviderSlotTime', function ($q) use ($providerId, $providerDetails) {
                 $q->where('schedule_provider_id', $providerId)
@@ -37,7 +37,7 @@ class ResultCalculationService
         foreach ($orderItems as $item) {
             // Cache provider slots
             $providerSlots = DB::table('provider_slots')
-                ->where('id', $item->scheduleProviderSlotTime->slot_id)
+                ->where('betting_provider_id', $item->scheduleProviderSlotTime->betting_providers_id)
                 ->get()
                 ->keyBy('slot_id');
             $digitMasterId = $item->scheduleProviderSlotTime->digit_master_id;

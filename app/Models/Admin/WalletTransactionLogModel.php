@@ -2,6 +2,7 @@
 
 namespace App\Models\Admin;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class WalletTransactionLogModel extends Model
@@ -14,6 +15,12 @@ class WalletTransactionLogModel extends Model
         'type',
         'amount',
         'bonus_amount',
-        'description'
+        'description',
+        'created_by'
     ];
+
+    public function userDetail()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
 }

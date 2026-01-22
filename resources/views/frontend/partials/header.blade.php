@@ -92,9 +92,9 @@
                         <a class="nav-link" href="{{ route('customer.results') }}">Results</a>
                     </li>
 
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ route('customer.rules') }}">Rules</a>
-                    </li>
+                    </li> --}}
 
                     <li class="nav-item">
                         <a class="nav-link" href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}"

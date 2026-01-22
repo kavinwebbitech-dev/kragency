@@ -13,12 +13,18 @@ class WalletModel extends Model
         'balance',
         'bonus_amount',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'created_by'
     ];
 
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function userDetail()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 }

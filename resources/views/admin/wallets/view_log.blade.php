@@ -31,6 +31,7 @@
                                         <th>Amount</th>
                                         <th>Type</th>
                                         <th>Description</th>
+                                        <th>Updated By</th>
                                         <th>Date Created</th>
                                     </tr>
                                 </thead>
@@ -62,6 +63,7 @@
                     { data: 'amount', name: 'amount' },
                     { data: 'type', name: 'type' },
                     { data: 'description', name: 'description' },
+                    { data: 'created_by', name: 'created_by' },
                     { data: 'created_at', name: 'created_at' }
                 ]
             });
