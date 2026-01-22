@@ -20,120 +20,136 @@ class ResultCalculationService
      */
     public function calculateWinnings($providerId, $providerDetails, $result)
     {
-//
-        $orderItems = CustomerOrderItemModel::whereNull('win_amount')->with(['scheduleProviderSlotTime' => function($q) use ($providerId, $providerDetails) {
-            $q->where('schedule_provider_id', $providerId);
-            $q->where('betting_providers_id', $providerDetails->betting_providers_id);
-            $q->whereDate('created_at', now()->toDateString());
-            // select only needed columns
-            $q->select('id', 'digit_master_id');
-        }])->whereHas('scheduleProviderSlotTime', function($q) use ($providerId, $providerDetails) {
-            $q->where('schedule_provider_id', $providerId);
-            $q->where('betting_providers_id', $providerDetails->betting_providers_id);
-            $q->whereDate('created_at', now()->toDateString());
-        })->get();
+        $orderItems = CustomerOrderItemModel::whereNull('win_amount')
+            ->with(['scheduleProviderSlotTime' => function ($q) use ($providerId, $providerDetails) {
+                $q->where('schedule_provider_id', $providerId)
+                ->where('betting_providers_id', $providerDetails->betting_providers_id)
+                ->whereDate('created_at', now()->toDateString())
+                ->select('id', 'digit_master_id','slot_id');
+            }])
+            ->whereHas('scheduleProviderSlotTime', function ($q) use ($providerId, $providerDetails) {
+                $q->where('schedule_provider_id', $providerId)
+                ->where('betting_providers_id', $providerDetails->betting_providers_id)
+                ->whereDate('created_at', now()->toDateString());
+            })
+            ->get();
 
         foreach ($orderItems as $item) {
-            $provider_slots = DB::table('provider_slots')->where([
-                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                'slot_id' =>$item->scheduleProviderSlotTime->digit_master_id
-                ])->first();
+            // Cache provider slots
+            $providerSlots = DB::table('provider_slots')
+                ->where('id', $item->scheduleProviderSlotTime->slot_id)
+                ->get()
+                ->keyBy('slot_id');
+            $digitMasterId = $item->scheduleProviderSlotTime->digit_master_id;
+            $digits = (string) $item->digits;
+            $result = (string) $result;
 
             $winAmount = 0;
             $winStatus = 'lost';
-            $digits = $item->digits;
-            $len = strlen($result);
 
-            $rules = [
-                1 => ['len' => 3, 'substr' => [-3, 1], 'label' => 'A Slot Win'],
-                2 => ['len' => 2, 'substr' => [-2, 1], 'label' => 'B Slot Win'],
-                3 => ['len' => 1, 'substr' => [-1, null], 'label' => 'C Slot Win'],
-                4 => ['len' => 3, 'substr' => [-3, 2], 'label' => 'AB Slot Win'],
-                5 => ['len' => 3, 'substr' => [-2, null], 'label' => 'BC Slot Win'],
-                6 => ['len' => 3, 'firstLast' => true, 'label' => 'AC Slot Win'],
-                7 => ['len' => 4, 'substr' => [-3, null], 'label' => 'ABC Slot Win'],
-                8 => ['len' => 4, 'substr' => [-4, null], 'label' => 'XABC Slot Win'],
-                9 => ['len' => 3, 'substr' => [-2, null], 'label' => 'ABC (BC) Slot Win'],
-                10 => ['len' => 1, 'substr' => [-1, null], 'label' => 'ABC (C) Slot Win'],
-                11 => ['len' => 3, 'substr' => [-3, null], 'label' => 'XABC (ABC) Slot Win'], // last 3 digits (NEW)
-            ];
+            // ---------------- COMBINATION RULES ----------------
+            switch ($digitMasterId) {
 
-            $digitMasterId = $item->scheduleProviderSlotTime->digit_master_id;
-            if (isset($rules[$digitMasterId])) {
-                $rule = $rules[$digitMasterId];
-                
-                if ($digits >= $rule['len']) {
-                    if (!empty($rule['firstLast'])) {
-                        $check = substr($result, 0, 1) . substr($result, -1);
-                    } else {
-                        $start = $rule['substr'][0];
-                        $length = $rule['substr'][1] ?? null;
-                        $check = substr($result, $start, $length);
+                // A
+                case 1:
+                    if (substr($result, -3, 1) === $digits) {
+                        $winStatus = 'A Slot Win';
                     }
+                    break;
 
-                    if ($digitMasterId == 7) {
-                        if ($check === $digits) {
-                            $winStatus = $rule['label'];
-                            $winAmount = $provider_slots->winning_amount * $item->quantity;
-                        } else if (substr($result, 1) === substr($digits, 1)) {
-                            $provider_slots2 = DB::table('provider_slots')->where([
-                                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                                'slot_id' => 9
-                                ])->first();
-                            $winStatus = $rules[9]['label'];
-                            $winAmount = $provider_slots2->winning_amount * $item->quantity;
-                        } else if (substr($result, offset: 2) === substr($digits, 2)) {
-                            $provider_slots3 = DB::table('provider_slots')->where([
-                                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                                'slot_id' => 10
-                                ])->first();
-                            $winStatus = $rules[10]['label'];
-                            $winAmount = $provider_slots3->winning_amount * $item->quantity;
-                        }
-                    }elseif ($digitMasterId == 8) {
-                        if ($check === $digits) {
-                            $winStatus = $rule['label'];
-                            $winAmount = $provider_slots->winning_amount * $item->quantity;
-                        } else if (substr($result, 1) === substr($digits, 1)) {
-                            $provider_slots2 = DB::table('provider_slots')->where([
-                                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                                'slot_id' => 11
-                                ])->first();
-                            $winStatus = $rules[11]['label'];
-                            $winAmount = $provider_slots2->winning_amount * $item->quantity;
-                        } else if (substr($result, 2) === substr($digits, 2)) {
-                            $provider_slots2 = DB::table('provider_slots')->where([
-                                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                                'slot_id' => 9
-                                ])->first();
-                            $winStatus = $rules[9]['label'];
-                            $winAmount = $provider_slots2->winning_amount * $item->quantity;
-                        } else if (substr($result, 3) === substr($digits, 3)) {
-                            $provider_slots3 = DB::table('provider_slots')->where([
-                                'betting_provider_id'=>$providerDetails->betting_providers_id,
-                                'slot_id' => 10
-                                ])->first();
-                            $winStatus = $rules[10]['label'];
-                            $winAmount = $provider_slots3->winning_amount * $item->quantity;
-                        }
-                    } else {
-                        if ($check === $digits) {
-                            $winStatus = $rule['label'];
-                            $winAmount = $provider_slots->winning_amount * $item->quantity;
-                        }
+                // B
+                case 2:
+                    if (substr($result, -2, 1) === $digits) {
+                        $winStatus = 'B Slot Win';
                     }
-                }
+                    break;
+
+                // C
+                case 3:
+                    if (substr($result, -1) === $digits) {
+                        $winStatus = 'C Slot Win';
+                    }
+                    break;
+
+                // AB
+                case 4:
+                    if (substr($result, -3, 2) === $digits) {
+                        $winStatus = 'AB Slot Win';
+                    }
+                    break;
+
+                // AC
+                case 6:
+                    if ((substr($result, -3, 1) . substr($result, -1)) === $digits) {
+                        $winStatus = 'AC Slot Win';
+                    }
+                    break;
+
+                // BC
+                case 5:
+                    if (substr($result, -2) === $digits) {
+                        $winStatus = 'BC Slot Win';
+                    }
+                    break;
+
+                // ABC
+                case 7:
+                    if (substr($result, -3) === $digits) {
+                        $winStatus = 'ABC Slot Win';
+                    } elseif (substr($result, -2) === substr($digits, -2)) {
+                        $digitMasterId = 9; // ABC (BC)
+                        $winStatus = 'ABC (BC) Slot Win';
+                    } elseif (substr($result, -1) === substr($digits, -1)) {
+                        $digitMasterId = 10; // ABC (C)
+                        $winStatus = 'ABC (C) Slot Win';
+                    }
+                    break;
+
+                // XABC
+                case 8:
+                    if (substr($result, -4) === $digits) {
+                        $winStatus = 'XABC Slot Win';
+                    } elseif (substr($result, -3) === substr($digits, -3)) {
+                        $digitMasterId = 11; // XABC (ABC)
+                        $winStatus = 'XABC (ABC) Slot Win';
+                    } elseif (substr($result, -2) === substr($digits, -2)) {
+                        $digitMasterId = 9;
+                        $winStatus = 'ABC (BC) Slot Win';
+                    } elseif (substr($result, -1) === substr($digits, -1)) {
+                        $digitMasterId = 10;
+                        $winStatus = 'ABC (C) Slot Win';
+                    }
+                    break;
             }
 
-            $item->win_amount = $winAmount;
-            $item->win_status = $winStatus;
-            $item->save();
+            // ---------------- PAYOUT ----------------
+            if ($winStatus !== 'lost' && isset($providerSlots[$digitMasterId])) {
+                $winAmount = $providerSlots[$digitMasterId]->winning_amount * $item->quantity;
+            }
 
-            // Get user_id from order
+            $item->update([
+                'win_amount' => $winAmount,
+                'win_status' => $winStatus
+            ]);
+
+            // ---------------- WALLET ----------------
             $order = CustomerOrder::find($item->order_id);
-            $userId = $order ? $order->user_id : null;
+            if ($order && $winAmount > 0) {
 
-            // Log the result calculation
+                $wallet = WalletModel::firstOrCreate(['user_id' => $order->user_id]);
+
+                $wallet->increment('balance', $winAmount);
+
+                WalletTransactionLogModel::create([
+                    'user_id' => $order->user_id,
+                    'user_wallet_id' => $wallet->id,
+                    'type' => 'credit',
+                    'amount' => $winAmount,
+                    'description' => 'Winning for order item #' . $item->id,
+                ]);
+            }
+
+            // ---------------- LOG ----------------
             ResultCalculationLog::create([
                 'provider_id' => $providerId,
                 'order_item_id' => $item->id,
@@ -141,25 +157,9 @@ class ResultCalculationService
                 'result' => $result,
                 'win_amount' => $winAmount,
                 'win_status' => $winStatus,
-                'user_id' => $userId,
+                'user_id' => $order->user_id ?? null,
             ]);
-
-            
-            if ($winAmount > 0 && $userId) {
-                $wallet = WalletModel::where('user_id', $userId)->first();
-                if ($wallet) {
-                    $wallet->balance += $winAmount;
-                    $wallet->save();
-
-                    WalletTransactionLogModel::create([
-                        'user_id' => $userId,
-                        'user_wallet_id' => $wallet->id,
-                        'type' => 'credit',
-                        'amount' => $winAmount,
-                        'description' => 'Winning for order item #' . $item->id,
-                    ]);
-                }
-            }
         }
     }
+
 }

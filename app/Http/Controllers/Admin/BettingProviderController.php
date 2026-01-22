@@ -10,6 +10,7 @@ use App\Models\Admin\BettingProviderSlotModel;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Validation\Rule;
 
 class BettingProviderController extends Controller
 {
@@ -128,7 +129,9 @@ class BettingProviderController extends Controller
 
     if ($request->isMethod('post')) {
             $request->validate([
-                'name' => ['required', 'string', 'max:255', 'unique:betting_providers,name,' . $provider_id],
+                Rule::unique('betting_providers', 'name')
+                    ->ignore($provider_id)
+                    ->whereNull('deleted_at'),
                 'status' => ['required', 'in:0,1'],
                 'time'   => ['required', 'array', 'min:1'],
                 'time.*' => ['required', 'distinct', 'regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/'], // 24-hour format

@@ -23,41 +23,59 @@ class CreateGameScheduleModel extends Model
     ];
 
 
-    public function getGameSchedule() {
+    public function getGameSchedule()
+    {
         try {
-            $data_provider =  DB::table($this->table)
+            $data_provider = DB::table($this->table)
                 ->select('betting_providers_id')
-                ->selectRaw('MIN(CASE WHEN slot_time >= ? THEN slot_time ELSE NULL END) as next_slot_time', [now()])
+                ->selectRaw(
+                    'MIN(CASE WHEN slot_time >= ? THEN slot_time ELSE NULL END) as next_slot_time',
+                    [now()]
+                )
                 ->whereDate('created_at', today())
-                 ->groupBy('betting_providers_id')
-                 ->orderBy('next_slot_time')
+                ->whereNull('deleted_at')
+                ->groupBy('betting_providers_id')
+                ->orderBy('next_slot_time')
                 ->get();
-                // dd(today(),time());
+
+            $finalProviders = collect();
+
             foreach ($data_provider as $provider) {
+
                 $slots = DB::table('betting_providers')
                     ->where('id', $provider->betting_providers_id)
+                    ->whereNull('deleted_at')
                     ->first();
+
+                if (!$slots) {
+                    continue; // 🚫 skip deleted provider completely
+                }
+
+                // ✅ assign ONLY after valid provider
                 $provider->name = $slots->name;
                 $provider->imagepath = $slots->image;
                 $provider->is_default = $slots->is_default;
 
-                //get next slot id
-                if($provider->next_slot_time) {
+                if ($provider->next_slot_time) {
                     $nextSlot = DB::table($this->table)
                         ->where('betting_providers_id', $provider->betting_providers_id)
                         ->where('slot_time', $provider->next_slot_time)
                         ->whereDate('created_at', today())
+                        ->whereNull('deleted_at')
                         ->first();
-                    $provider->next_slot_id = $nextSlot ? $nextSlot->slot_time_id : null;
+
+                    $provider->next_slot_id = $nextSlot?->slot_time_id;
                 } else {
                     $provider->next_slot_id = null;
                 }
 
+                $finalProviders->push($provider);
             }
-            return $data_provider;
+
+            return $finalProviders;
 
         } catch (\Exception $e) {
-            //dd($e->getMessage());
+            // log error
         }
     }
 
@@ -86,14 +104,21 @@ class CreateGameScheduleModel extends Model
 
             $providerTimes = $providerTimesQuery->get();
             foreach ($providerTimes as $key => $time) {
-                $providerTimesQuery = DB::table('betting_providers')->where('id', $time->betting_providers_id)->first();
+                $providerTimesQuery = DB::table('betting_providers')
+                    ->where('id', $time->betting_providers_id)
+                    ->whereNull('deleted_at')
+                    ->first();
+                if (!$providerTimesQuery) {
+                    unset($providerTimes[$key]); // remove deleted provider
+                    continue;
+                }
                 $providerTimes[$key]->name = $providerTimesQuery->name;
                 $providerTimes[$key]->time_id = $providerTimesQuery->id;
             }
             return $providerTimes;
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            // dd($e->getMessage());
         }
     }
 
