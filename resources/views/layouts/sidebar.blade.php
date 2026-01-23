@@ -55,12 +55,6 @@
                             <p>Wallet</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.wallet.index') }}" class="nav-link">
-                            <i class="nav-icon bi bi-wallet2"></i>
-                            <p>Wallet History</p>
-                        </a>
-                    </li>
 
                     <li class="nav-item">
                         <a href="{{ route('admin.withdraw.index') }}" class="nav-link">
