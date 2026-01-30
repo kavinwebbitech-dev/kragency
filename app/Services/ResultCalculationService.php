@@ -112,13 +112,15 @@ class ResultCalculationService
                     } elseif (substr($result, -3) === substr($digits, -3)) {
                         $digitMasterId = 11; // XABC (ABC)
                         $winStatus = 'XABC (ABC) Slot Win';
-                    } elseif (substr($result, -2) === substr($digits, -2)) {
-                        $digitMasterId = 9;
-                        $winStatus = 'ABC (BC) Slot Win';
-                    } elseif (substr($result, -1) === substr($digits, -1)) {
-                        $digitMasterId = 10;
-                        $winStatus = 'ABC (C) Slot Win';
-                    }
+                    } 
+                    // elseif (substr($result, -2) === substr($digits, -2)) {
+                    //     $digitMasterId = 9;
+                    //     $winStatus = 'ABC (BC) Slot Win';
+                    // } 
+                    // elseif (substr($result, -1) === substr($digits, -1)) {
+                    //     $digitMasterId = 10;
+                    //     $winStatus = 'ABC (C) Slot Win';
+                    // }
                     break;
             }
 
