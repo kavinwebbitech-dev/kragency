@@ -114,7 +114,7 @@
 
                     <li class="nav-item">
                         <a href="{{ route('admin.users.get-contacts') }}" class="nav-link">
-                            <i class="nav-icon bi bi-whatsapp"></i>
+                            <i class="nav-icon bi bi-person-lines-fill"></i>
                             <p>Customer Contacts</p>
                         </a>
                     </li>

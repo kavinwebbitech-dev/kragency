@@ -29,7 +29,10 @@
                     <div class="card mb-4">
                         <div class="card-header ">
                             <h3 style="margin-top: 10px;" class="card-title ">{{ __('customers/message.customer_contacts') }}</h3>
-                            {{-- <a href="{{ route('admin.provider.add') }}" class="btn btn-primary float-end" name="save" value="create">{{ __('customers/message.add_providers') }}</a> --}}
+                            <a href="{{ route('admin.contacts.export') }}"
+                                class="btn btn-success float-end">
+                                <i class="bi bi-download"></i> Export Contacts
+                            </a>
                         </div>
                         <div class="card-body">
                             <table id ="providerTable" class="table table-bordered">
