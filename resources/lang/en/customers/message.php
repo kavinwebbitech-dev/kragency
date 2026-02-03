@@ -11,6 +11,7 @@ return [
     'view_tranaction_logs' => 'View Transaction Logs',
 
     'betting_providers' => 'Betting Providers',
+    'customer_contacts' => 'Customer Contacts',
     'add_providers' => 'Add Providers',
     'edit_providers' => 'Edit Providers'
 ];

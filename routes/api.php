@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\BankDetailController;
 
 Route::post('customer/login', [AuthenticatedSessionController::class, 'login']);
+Route::post('customer/contacts', [AuthenticatedSessionController::class, 'contactStore']);
 Route::get('customer/whatsapp-link', [AuthenticatedSessionController::class, 'whatsappLink']);
 Route::get('customer/results', [CustomerController::class, 'results']);
 Route::get('customer/game-schedule', [CustomerController::class, 'index']);

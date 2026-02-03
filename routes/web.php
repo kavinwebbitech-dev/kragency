@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Admin\BettingProviderController;
+use App\Http\Controllers\Admin\CustomerContactController;
 use App\Http\Controllers\Admin\PublishResultController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.user.destroy');
     Route::get('/admin/view-transaction/{user}', [UserController::class, 'viewTransaction'])->name('admin.view-transaction');
     Route::get('/admin/get-users-transaction/{user}', [UserController::class, 'getTransactionData'])->name('admin.users.get-transaction');
+    Route::get('/admin/get-contacts', [CustomerContactController::class, 'index'])->name('admin.users.get-contacts');
+    Route::delete('/admin/contact/delete/{id}', [CustomerContactController::class, 'deleteContact'])->name('admin.contact.delete');
 
     //change password
     Route::get('change-password', [UserController::class, 'editPassword'])
