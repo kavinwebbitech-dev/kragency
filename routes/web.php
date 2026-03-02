@@ -35,8 +35,8 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthenticatedSessionController::class, 'createCustomer'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'storeCustomer'])->name('login');
+    Route::get('/', [AuthenticatedSessionController::class, 'createCustomer'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'storeCustomer'])->name('login.check');
 });
 
 Route::get('customer-results', [CustomerController::class, 'results'])->name('customer.results');
@@ -53,8 +53,6 @@ Route::middleware('auth')->group(function () {
 //Route::get('/', function () {
     //return redirect()->route('landing-dashboard');
 //});
-
-Route::get('/', [AuthenticatedSessionController::class, 'landingDashboard'])->name('landing-dashboard');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
@@ -80,6 +78,7 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::get('/admin/get-contacts', [CustomerContactController::class, 'index'])->name('admin.users.get-contacts');
     Route::delete('/admin/contact/delete/{id}', [CustomerContactController::class, 'deleteContact'])->name('admin.contact.delete');
     Route::get('admin/contacts/export',[CustomerContactController::class, 'export'])->name('admin.contacts.export');
+    Route::get('/send',[CustomerContactController::class, 'send']);
 
     //change password
     Route::get('change-password', [UserController::class, 'editPassword'])
@@ -179,6 +178,7 @@ Route::get('customer-rules', [CustomerController::class, 'rules'])->name('custom
 //user routes
 Route::middleware(['auth', 'onlyCustomer'])->group(function () {
     // AJAX endpoint for wallet check before adding to cart
+    Route::get('/home', [AuthenticatedSessionController::class, 'landingDashboard'])->name('landing-dashboard');
     Route::post('/lottery/cart/check-wallet', [\App\Http\Controllers\CartAjaxController::class, 'checkWallet'])->name('lottery.cart.check-wallet');
     Route::get('customer-dashboard', [CustomerController::class, 'index'])->name('customer.dashboard');
     Route::post('lottery/place-order', [CustomerController::class, 'placeOrder'])->name('lottery.place-order');

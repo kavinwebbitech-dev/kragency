@@ -119,6 +119,13 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ route('admin.users.get-contacts') }}" class="nav-link">
+                            <i class="nav-icon bi bi-megaphone-fill"></i>
+                            <p>Push Notification</p>
+                        </a>
+                    </li>
+
                     @php
                         $settingsOpen = Route::is('admin.sliders.*') || Route::is('admin.close-time.*');
                     @endphp

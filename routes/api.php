@@ -36,5 +36,7 @@ Route::prefix('customer')->group(function () {
         Route::get('withdraw-history', [WithdrawController::class, 'withdrawHistory']);
         Route::get('bank-details', [BankDetailController::class, 'show']);
         Route::post('bank-details-store', [BankDetailController::class, 'store']);
+        // Store device_token
+        Route::post('/save-device-token', [AuthenticatedSessionController::class, 'saveDeviceToken']);
     });
 });

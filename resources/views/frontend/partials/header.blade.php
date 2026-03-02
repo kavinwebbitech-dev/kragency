@@ -33,7 +33,7 @@
             {{-- ================= MOBILE RIGHT ICONS ================= --}}
             <div class="d-flex justify-content-end align-items-center d-lg-none">
                 <div class="mobile-icons">
-
+                    @auth
                     {{-- CART --}}
                     <a href="{{ route('lottery.view.cart') }}" class="icon-btn position-relative">
                         <i class="fas fa-shopping-cart"></i>
@@ -69,7 +69,7 @@
                             <i class="fas fa-user"></i>
                         </a>
                     @endif
-
+                    @endauth
                     {{-- MENU --}}
                     <button class="navbar-toggler" type="button" data-toggle="offcanvas" data-target="#navOffcanvas">
                         <span class="navbar-toggler-icon"></span>
@@ -80,7 +80,7 @@
             {{-- ================= DESKTOP NAV LINKS ================= --}}
             <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarNav">
                 <ul class="navbar-nav ml-auto align-items-lg-center">
-
+                    @auth
                     <li class="nav-item">
                         <a class="nav-link"
                             href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
@@ -95,15 +95,16 @@
                     {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ route('customer.rules') }}">Rules</a>
                     </li> --}}
-
+                    @auth
                     <li class="nav-item">
                         <a class="nav-link" href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}"
                             target="_blank">
                             Recharge
                         </a>
                     </li>
+                    @endauth
 
-
+                    @endauth
 
 
                     {{-- ================= AUTH USER DESKTOP ================= --}}
@@ -196,27 +197,30 @@
     </div>
     <div class="offcanvas-body">
         <ul class="offcanvas-menu">
+            @auth
             <li>
                 <a href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
                     <i class="fas fa-home"></i> Home
                 </a>
             </li>
+            
             <li>
                 <a href="{{ route('customer.results') }}">
                     <i class="fas fa-trophy"></i> Results
                 </a>
             </li>
-            <li>
-                <a href="{{ route('customer.rules') }}">
-                    <i class="fas fa-book"></i> Rules
-                </a>
-            </li>
+            
+            <!--<li>-->
+            <!--    <a href="{{ route('customer.rules') }}">-->
+            <!--        <i class="fas fa-book"></i> Rules-->
+            <!--    </a>-->
+            <!--</li>-->
             <li>
                 <a href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}" target="_blank">
                     <i class="fab fa-whatsapp"></i> Recharge
                 </a>
             </li>
-
+            @endauth
             @guest
                 <li>
                     <a href="{{ route('login') }}">

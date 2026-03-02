@@ -31,6 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
     
     ->withSchedule(function (Illuminate\Console\Scheduling\Schedule $schedule) {
         $schedule->command('app:schedule-daily-game')->dailyAt('00:10');
+        
+        // 🌅 Morning message daily at 8:00 AM
+        $schedule->command('notify:morning')->dailyAt('08:00');
+
+        // ⏰ Slot completed (example: every hour or specific time)
+        $schedule->command('notify:slot-completed')->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         //

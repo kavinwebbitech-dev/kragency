@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\WhatsAppLink;
-
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -79,6 +79,50 @@ class AuthenticatedSessionController extends Controller
             'link'   => $link
         ], 200);
     }
+
+    public function saveDeviceToken(Request $request)
+    {
+        try {
+            $request->validate([
+                'fcm_token' => 'sometimes|nullable|string'
+            ]);
+
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+
+            if ($request->has('fcm_token')) {
+                $user->device_token = $request->fcm_token;
+                $user->save();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Device token saved successfully'
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Save Device Token Error: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong while saving device token'
+            ], 500);
+        }
+    }
+
 
     public function contactStore(Request $request)
     {

@@ -1,7 +1,23 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Login - Kragncy')
+<style>
+    .btn-telegram {
+        background-color: #0088cc;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+    
+    .btn-telegram:hover {
+        background-color: #0077b6;
+    }
 
+</style>
 @section('content')
 
     <section class="login-section">
@@ -26,7 +42,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" class="login-form">
+                <form action="{{ route('login.check') }}" method="POST" class="login-form">
                     @csrf
                     <div class="form-group">
                         <label>Mobile Number</label>
@@ -42,9 +58,13 @@
 
                     <div class="or-separator">or</div>
 
-                    <a href="{{ $link ?? '#' }}" class="btn-whatsapp">
-                        <i class="fab fa-whatsapp"></i> Join Now on WhatsApp
+                    <a href="{{ $link ?? '#' }}" class="btn-telegram text-white">
+                        <i class="fab fa-telegram-plane"></i> Join Now on Telegram
                     </a>
+                    <!--<a href="{{ $link ?? '#' }}" class="btn-whatsapp">-->
+                    <!--    <i class="fab fa-whatsapp"></i> Join Now on WhatsApp-->
+                    <!--</a>-->
+
                 </form>
             </div>
         </div>
