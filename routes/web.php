@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Admin\BettingProviderController;
 use App\Http\Controllers\Admin\CustomerContactController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PublishResultController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
@@ -170,6 +171,11 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
 
     Route::get('admin/whatsapplink', [App\Http\Controllers\Admin\WhatsAppController::class, 'index'])->name('admin.whatsapplink');
     Route::post('admin/whatsapplink/save', [App\Http\Controllers\Admin\WhatsAppController::class, 'save'])->name('admin.whatsapplink.save');
+
+    Route::get('admin/send-notification', [NotificationController::class, 'index'])
+    ->name('admin.notification.index');
+    Route::post('admin/send-notification', [NotificationController::class, 'sendNotificaion'])
+    ->name('admin.notification.send');
 });
 
 
