@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Exception\Messaging\NotFound;
 use Kreait\Firebase\Messaging\AndroidConfig;
 
 class NotificationController extends Controller
@@ -29,23 +30,19 @@ class NotificationController extends Controller
 
         $type = $request->type ?? 'general';
 
-        // 🔥 Type-based icon & title
         switch ($type) {
             case 'offer':
                 $icon  = 'ic_offer';
                 $titlePrefix = '🔥 Special Offer!';
                 break;
-
             case 'reminder':
                 $icon  = 'ic_reminder';
                 $titlePrefix = '⏰ Reminder';
                 break;
-
             case 'alert':
                 $icon  = 'ic_alert';
                 $titlePrefix = '⚠ Important Alert';
                 break;
-
             default:
                 $icon  = 'ic_notification';
                 $titlePrefix = '📢 Notification';
@@ -54,15 +51,17 @@ class NotificationController extends Controller
 
         $finalTitle = $titlePrefix . ' - ' . $request->title;
 
-        try {
+        $factory = (new Factory)
+            ->withServiceAccount(config('firebase.projects.app.credentials.file'));
 
-            // ✅ Create Firebase instance ONCE
-            $factory = (new Factory)
-                ->withServiceAccount(config('firebase.projects.app.credentials.file'));
+        $messaging = $factory->createMessaging();
 
-            $messaging = $factory->createMessaging();
+        $successCount = 0;
+        $failCount = 0;
 
-            foreach ($users as $deviceToken) {
+        foreach ($users as $deviceToken) {
+
+            try {
 
                 $message = CloudMessage::withTarget('token', $deviceToken)
                     ->withAndroidConfig(AndroidConfig::fromArray([
@@ -84,15 +83,28 @@ class NotificationController extends Controller
                     ]);
 
                 $messaging->send($message);
+                $successCount++;
+
+            } catch (NotFound $e) {
+
+                // Remove invalid token
+                User::where('device_token', $deviceToken)
+                    ->update(['device_token' => null]);
+
+                $failCount++;
+                Log::warning("Invalid token removed: {$deviceToken}");
+
+            } catch (\Exception $e) {
+
+                // Any other error
+                $failCount++;
+                Log::error("FCM Error for token {$deviceToken}: " . $e->getMessage());
+
             }
-
-            Log::info("Push sent to " . count($users) . " users. Type: {$type}");
-
-            return back()->with('success', 'Notification sent to all users successfully');
-
-        } catch (\Exception $e) {
-            Log::error('FCM Error: ' . $e->getMessage());
-            return back()->with('error', 'Notification sending failed');
         }
+
+        Log::info("Push Result - Success: {$successCount}, Failed: {$failCount}");
+
+        return back()->with('success', "Notification sent. Success: {$successCount}, Failed: {$failCount}");
     }
 }

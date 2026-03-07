@@ -261,7 +261,6 @@ class CustomerController extends Controller
 
 
 
-
     public function paymentHistory(Request $request)
     {
         try {
@@ -316,8 +315,6 @@ class CustomerController extends Controller
     }
     public function customerOrderDetails(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
-
         $rows = DB::table('customer_orders')
             ->leftJoin('customer_order_items', 'customer_orders.id', '=', 'customer_order_items.order_id')
             ->leftJoin('schedule_providers_slot_time', 'schedule_providers_slot_time.id', '=', 'customer_order_items.game_id')
@@ -345,12 +342,13 @@ class CustomerController extends Controller
                 'betting_providers.name as provider_name',
                 'digit_master.name as game_digits'
             ])
-            ->paginate($perPage);
+            ->get(); // ✅ Removed paginate()
 
         // ✅ GROUP BY ORDER ID
-        $grouped = collect($rows->items())
+        $grouped = $rows
             ->groupBy('order_id')
             ->map(function ($items) {
+
                 $first = $items->first();
 
                 return [
@@ -375,16 +373,11 @@ class CustomerController extends Controller
                         ];
                     })->values()
                 ];
-            })->values();
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
-            'pagination' => [
-                'current_page' => $rows->currentPage(),
-                'per_page' => $rows->perPage(),
-                'total' => $rows->total(),
-                'last_page' => $rows->lastPage(),
-            ],
             'data' => $grouped
         ]);
     }

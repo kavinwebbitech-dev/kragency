@@ -51,6 +51,16 @@ class WithdrawAdminController extends Controller
         } elseif ($request->action === 'reject') {
             $withdraw->status = 'rejected';
             $withdraw->save();
+            $wallet = WalletModel::where('user_id', $withdraw->user_id)->lockForUpdate()->first();
+            WalletTransactionLogModel::create([
+                'user_id' => $withdraw->user_id,
+                'user_wallet_id' => $wallet->id,
+                'type' => 'credit',
+                'amount' => $withdraw->amount,
+                'description' => 'Withdraw rejected by admin',
+            ]);
+            $wallet->increment('balance', $withdraw->amount);
+            
             return back()->with('success', 'Withdraw request rejected.');
         }
         return back();
