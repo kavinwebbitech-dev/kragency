@@ -106,7 +106,8 @@ class BettingProviderController extends Controller
 
                 DB::commit();
                 
-                Artisan::queue('app:schedule-daily-game');
+                // Artisan::queue('app:schedule-daily-game');
+                Artisan::call('app:schedule-daily-game');
                 return redirect(route('admin.provider.index', [], false))->with('success', 'Provider created successfully');
 
             } catch (\Exception $e) {
@@ -222,9 +223,9 @@ class BettingProviderController extends Controller
                     // Delete slots that were not submitted
                     $provider->providerSlot()->whereNotIn('id', $keepIds)->delete();
                     
-                    Artisan::queue('app:schedule-daily-game');
+                    // Artisan::queue('app:schedule-daily-game');
                 });
-
+                Artisan::call('app:schedule-daily-game');
                 return redirect(route('admin.provider.index'))
                     ->with('success', 'Provider updated successfully.');
             }

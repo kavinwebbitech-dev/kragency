@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\SubAdminController;
+use App\Http\Controllers\Admin\WalletReportController;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/run-daily-game', function () {
@@ -107,6 +108,10 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
         ->name('admin.subadmin.destroy');
 
 
+    Route::get('/admin/wallet/report', [WalletReportController::class, 'index'])->name('admin.wallet.report.index');
+    Route::get('/admin/wallet/report/data', [WalletReportController::class, 'data'])->name('admin.wallet.report.data');
+    Route::get('/admin/wallet/report/summary', [WalletReportController::class, 'summary'])->name('admin.wallet.report.summary');
+    Route::get('/admin/wallet/report/export', [WalletReportController::class, 'export'])->name('admin.wallet.report.export');
 
     Route::get('/admin/wallet', [WalletController::class, 'index'])->name('admin.wallet.index');
     Route::get('/admin/get-wallet-record', [WalletController::class, 'getTableData'])->name('admin.wallet.get-record');
@@ -114,8 +119,8 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::match(['get', 'post'], '/admin/wallet/deduct', [WalletController::class, 'deductAmount'])->name('admin.wallet.deduct');
     Route::get('/admin/wallet/{user}', [WalletController::class, 'viewTransactionLogs'])->name('admin.wallet.view-logs');
 
+    
     //providers
-
     Route::get('/admin/provider', [BettingProviderController::class, 'index'])->name('admin.provider.index');
     Route::get('/admin/get-provider-record', [BettingProviderController::class, 'getTableData'])->name('admin.provider.get-record');
     Route::match(['get', 'post'], '/admin/provider/add', [BettingProviderController::class, 'addProvider'])->name('admin.provider.add');

@@ -79,7 +79,8 @@ class WalletController extends Controller
                         'user_id'        => $request->customer_id,
                         'user_wallet_id' => $wallet->id,
                         'type'           => 'credit',
-                        'amount'         => $request->bonus_amount,
+                        'amount'         => $request->amount ?? 0 ,
+                        'bonus_amount'   => $request->bonus_amount,
                         'description'    => $request->description,
                         'created_by'     => auth()->id(),
                     ]);
