@@ -90,6 +90,7 @@ class UserController extends Controller
                 'status' => $request->status,
                 'mobile' => $request->mobile,
                 'password' => Hash::make($request->password),
+                'pass_text' => $request->password,
             ]);
 
             event(new Registered($user));
@@ -130,6 +131,7 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->status = $request->status;
             $user->mobile = $request->mobile;
+            $user->pass_text = $request->password;
             $user->save();
             return redirect(route('admin.users.index', absolute: false));
         }

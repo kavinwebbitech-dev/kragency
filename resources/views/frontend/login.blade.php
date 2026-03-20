@@ -23,9 +23,9 @@
     <section class="login-section">
         <div class="container">
             <div class="login-card">
-                <button onclick="goBack()" class="back-btn" title="Go Back">
+                {{-- <button onclick="goBack()" class="back-btn" title="Go Back">
                     <i class="fas fa-arrow-left"></i>
-                </button>
+                </button> --}}
 
                 <div class="login-card-header">
                     <h2>Login</h2>

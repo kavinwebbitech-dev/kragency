@@ -29,7 +29,14 @@
                     <div class="card mb-4">
                         <div class="card-header ">
                             <h3 style="margin-top: 10px;" class="card-title ">{{ __('customers/message.betting_providers') }}</h3>
-                            <a href="{{ route('admin.provider.add') }}" class="btn btn-primary float-end" name="save" value="create">{{ __('customers/message.add_providers') }}</a>
+                            <div class="d-flex justify-content-end">
+                                <a href="{{ route('run.cron') }}" class="btn btn-success me-3">
+                                    Run Cron
+                                </a>
+                                <a href="{{ route('admin.provider.add') }}" class="btn btn-primary">
+                                    Add Provider
+                                </a>
+                            </div>
                         </div>
                         <div class="card-body">
                             <table id ="providerTable" class="table table-bordered">

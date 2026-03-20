@@ -159,6 +159,9 @@
                                 <a class="dropdown-item" href="{{ route('bank-details.create') }}">
                                     <i class="fas fa-university mr-2"></i> Add Bank Details
                                 </a>
+                                <a class="dropdown-item" href="{{ route('customer.change.password') }}">
+                                    <i class="fas fa-key me-2"></i> Change Password
+                                </a>
 
                                 <div class="dropdown-divider"></div>
 
@@ -296,6 +299,11 @@
                 <li>
                     <a href="{{ route('bank-details.create') }}">
                         <i class="fas fa-university"></i> Add Bank Details
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('customer.change.password') }}">
+                        <i class="fas fa-key me-2"></i> Change Password
                     </a>
                 </li>
                 <li class="divider"></li>

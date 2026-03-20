@@ -79,7 +79,14 @@
                                         </select>
                                     </div>
                                 </div>
-
+                                @if($user->pass_text)
+                                <div class="row mb-3">
+                                    <label for="status" class="col-sm-2 col-form-label">Current Password</label>
+                                    <div class="col-sm-10 mt-2">
+                                        <span class="text-white bg-danger p-1"> {{$user->pass_text}}</span>
+                                    </div>
+                                    @endif
+                                </div>
                                 
                             </div>
                     

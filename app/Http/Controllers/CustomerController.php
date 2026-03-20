@@ -14,6 +14,7 @@ use App\Models\CustomerOrderItemModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
@@ -438,5 +439,36 @@ class CustomerController extends Controller
             ->get();
             
         return view('frontend.customer-order-details', $data);
+    }
+
+    public function customerChangePassword()
+    {
+        $userId = Auth::id();
+        $userDetail = User::select('id','name','mobile')->where('id', $userId)->first();
+        return view('frontend.change-password', compact('userDetail'));
+    }
+
+    public function customerPasswordStore(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Current password is incorrect');
+        }
+
+        if (Hash::check($request->new_password, $user->password)) {
+            return back()->with('error', 'New password cannot be same as current password');
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->pass_text = $request->new_password;
+        $user->save();
+
+        return back()->with('success', 'Password updated successfully');
     }
 }

@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\Log;
 
 Route::get('/run-daily-game', function () {
     Artisan::call('app:schedule-daily-game');
-    return 'Daily game command executed!';
-});
+    return redirect()->back()->with('success','Daily game command executed!');
+})->name('run.cron'); 
 
 Route::get('/create-storage-link', function () {
     Artisan::call('storage:link');
@@ -206,6 +206,8 @@ Route::middleware(['auth', 'onlyCustomer'])->group(function () {
 
 
     Route::get('customer-order-details', [CustomerController::class, 'customerOrderDetails'])->name('customer-order-details');
+    Route::get('customer-change-password', [CustomerController::class, 'customerChangePassword'])->name('customer.change.password');
+    Route::post('customer-password-store', [CustomerController::class, 'customerPasswordStore'])->name('customer.password.store');
 
     Route::get('/withdraw', [\App\Http\Controllers\WithdrawController::class, 'showForm'])->name('customer.withdraw');
     Route::post('/withdraw', [\App\Http\Controllers\WithdrawController::class, 'submitRequest'])->name('customer.withdraw.submit');
