@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Session;
 use App\Models\CreateGameScheduleModel;
 use App\Models\Admin\BettingProvidersModel;
 use App\Models\Admin\SliderModel;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
@@ -739,4 +741,44 @@ class CustomerController extends Controller
     //     ], 400);
     // }
 
+    public function customerPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Current password is incorrect'
+            ], 401);
+        }
+
+        if (Hash::check($request->new_password, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'New password cannot be same as current password'
+            ], 400);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->pass_text = $request->new_password; 
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully'
+        ], 200);
+    }
 }

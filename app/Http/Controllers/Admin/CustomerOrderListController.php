@@ -144,7 +144,8 @@ class CustomerOrderListController extends Controller
         $query = CustomerOrderItemModel::with([
             'customerOrders.user',
             'scheduleProviderSlotTime',
-            'scheduleProviderSlotTime.getProvider'
+            'scheduleProviderSlotTime.getProvider',
+            'scheduleProviderSlotTime.providerSlot.digitMaster'
         ])->whereDate('created_at', $today);
 
         /* ---------- Filters ---------- */
@@ -198,9 +199,7 @@ class CustomerOrderListController extends Controller
 
             foreach ($orders as $i => $order) {
                 $digits = $order->digits ?? '';
-                $type   = strlen($digits);
-                $label  = $digitMap[$type] ?? '';
-                $digitAdded = $digits . ($label ? " ({$label})" : '');
+                $digitAdded = $digits . ' (' . ($order->scheduleProviderSlotTime?->providerSlot?->digitMaster?->name ?? '') . ')';
 
                 fputcsv($file, [
                     $i + 1,
