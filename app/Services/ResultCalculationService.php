@@ -53,7 +53,7 @@ class ResultCalculationService
     
             $digitMasterId = $item->scheduleProviderSlotTime->digit_master_id;
             $digits        = (string)$item->digits;
-            $userAmount    = (int)$item->amount;
+            $userAmount    = $item->scheduleProviderSlotTime->amount;
             $quantity      = $item->quantity;
     
             $winAmount = 0;

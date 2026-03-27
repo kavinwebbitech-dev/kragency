@@ -95,12 +95,12 @@ class PublishResultController extends Controller
                 $result = $request->input('name');
 
                 // Update the result in schedule_provider
-                // DB::table('schedule_provider')
-                //     ->where('id', $provider_id)
-                //     ->update([
-                //         'result' => $result,
-                //         'updated_at' => now(),
-                //     ]);
+                DB::table('schedule_provider')
+                    ->where('id', $provider_id)
+                    ->update([
+                        'result' => $result,
+                        'updated_at' => now(),
+                    ]);
 
                 // Use the service for winnings calculation
                 //dispatch(new \App\Jobs\CalculateWinningsJob($provider_id, $providerDetails, $result));
