@@ -146,7 +146,7 @@
                                     if (provider) params.push('provider=' + encodeURIComponent(provider));
                                     if (time) params.push('time=' + encodeURIComponent(time));
                                     if (params.length) url += '?' + params.join('&');
-                                    window.open(url);
+                                    window.open(url, '_blank');
                                 });
                             });
                         </script>
