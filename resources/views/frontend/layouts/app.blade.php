@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('frontend/css/responsive.css') }}">
     <link rel="shortcut icon" href="{{ asset('frontend/images/favicon.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('frontend/css/header.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     @stack('styles')
     <title>@yield('title', 'Kragncy')</title>
 </head>

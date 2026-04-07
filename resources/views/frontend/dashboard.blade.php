@@ -124,7 +124,7 @@
                                                 alt="">
 
                                             <div class="draw-card__icon">
-                                                <img src="{{ asset('../storage/app/public/' . $provider->imagepath) }}"
+                                                <img src="{{ asset($provider->imagepath) }}"
                                                     alt="">
                                             </div>
 

@@ -65,7 +65,11 @@ class BettingProviderController extends Controller
             $imagePath = null;
             // Handle image upload
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('providers', 'public');
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('uploads/providers'), $imageName);
+
+                $imagePath = 'uploads/providers/' . $imageName;
             }
 
             try {
@@ -150,7 +154,11 @@ class BettingProviderController extends Controller
                 $imagePath = null;
                 // Handle image upload
                 if ($request->hasFile('image')) {
-                    $imagePath = $request->file('image')->store('providers', 'public');
+                    $image = $request->file('image');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('uploads/providers'), $imageName);
+
+                    $imagePath = 'uploads/providers/' . $imageName;
                 }
 
                 // add update operation here
