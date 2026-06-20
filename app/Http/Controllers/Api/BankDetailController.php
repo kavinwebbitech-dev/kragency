@@ -26,6 +26,7 @@ class BankDetailController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'bank_name' => 'required|string|max:255',
+            'account_holder_name' => 'required|string|max:20',
             'ifsc_code' => 'required|string|max:20',
             'branch_name' => 'nullable|string|max:255',
             'account_number' => 'required|string|max:50',
@@ -44,6 +45,7 @@ class BankDetailController extends Controller
                 ['user_id' => Auth::id()],
                 [
                     'bank_name' => $request->bank_name,
+                    'ac_holder_name' => $request->account_holder_name,
                     'ifsc_code' => $request->ifsc_code,
                     'branch_name' => $request->branch_name,
                     'account_number' => $request->account_number,

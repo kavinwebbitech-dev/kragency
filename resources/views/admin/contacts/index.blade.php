@@ -27,21 +27,20 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card mb-4">
-                        <div class="card-header ">
-                            <h3 style="margin-top: 10px;" class="card-title ">{{ __('customers/message.customer_contacts') }}</h3>
-                            <a href="{{ route('admin.contacts.export') }}"
-                                class="btn btn-success float-end">
+                        <div class="card-header">
+                            <h3 style="margin-top: 10px;" class="card-title">{{ __('customers/message.customer_contacts') }}</h3>
+                            <a href="{{ route('admin.contacts.export') }}" class="btn btn-success float-end">
                                 <i class="bi bi-download"></i> Export Contacts
                             </a>
                         </div>
                         <div class="card-body">
-                            <table id ="providerTable" class="table table-bordered">
+                            <table id="customerTable" class="table table-bordered table-striped visual-table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Mobile No</th>
-                                        <th>Emails</th>
+                                        <th>#</th>
+                                        <th>Customer ID</th>
+                                        <th>Customer Name</th>
+                                        <th>Total Contacts</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -52,83 +51,144 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="contactsModal" tabindex="-1" aria-labelledby="contactsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="contactsModalLabel">Contacts for Customer: <span id="modalCustomerName" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="modalContactsTable" class="table table-bordered w-100">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Contact Name</th>
+                                <th>Mobile No</th>
+                                <th>Emails</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 @endsection
 
 @push('scripts')
     <script>
-        $('#providerTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: "{{ route('admin.users.get-contacts') }}",
-            columns: [
-                { 
-                    data: null, 
-                    name: 'id',
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
+        $(document).ready(function() {
+            var customerTable = $('#customerTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('admin.users.get-contacts') }}",
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'id', name: 'id' },
+                    { data: 'name', name: 'name' },
+                    { 
+                        data: 'contacts_count', 
+                        name: 'contacts_count', 
+                        className: 'text-center fw-bold text-success' 
+                    },
+                    {
+                        data: null,
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center',
+                        render: function (data, type, row) {
+                            return `
+                                <button type="button" class="btn btn-sm btn-primary btn-view-contacts" data-id="${row.id}" data-name="${row.name}">
+                                    <i class="bi bi-eye"></i> View Contacts
+                                </button>
+                            `;
+                        }
                     }
-                },
-                { data: 'name', name: 'name' },
-                {
-                    data: 'mobile_numbers',
-                    name: 'mobile_numbers',
-                    render: function(data) {
-                        if (!data || data.length === 0) return '-';
+                ]
+            });
 
-                        return data.map(function(d) {
-                            return d.number;
-                        }).join(', ');
-                    }
-                },
-                { 
-                    data: 'emails',
-                    name: 'emails',
-                    render: function(data) {
-                        if (!data || data.length === 0) return '-';
-                        return data.join(', ');
-                    }
-                },
-                {
-                    data: null,
-                    name: 'action',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-end',
-                    render: function (data, type, row) {
-                        const deleteUrl = `{{ route('admin.contact.delete', ':id') }}`.replace(':id', row.id);
+            var modalContactsTable = null;
 
-                        return `
-                            <a href="#" data-url="${deleteUrl}" class="btn btn-sm btn-danger btn-delete-provider" title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        `;
-                    }
+            $(document).on('click', '.btn-view-contacts', function() {
+                var customerId = $(this).data('id');
+                var customerName = $(this).data('name');
+
+                $('#modalCustomerName').text(`${customerName}`);
+
+                var dynamicAjaxUrl = "{{ url('admin/customers') }}/" + customerId + "/contacts";
+
+                if ($.fn.DataTable.isDataTable('#modalContactsTable')) {
+                    modalContactsTable.destroy();
                 }
-            ]
-        });
 
+                modalContactsTable = $('#modalContactsTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: dynamicAjaxUrl,
+                    columns: [
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                        { data: 'name', name: 'name' },
+                        {
+                            data: 'mobile_numbers',
+                            name: 'mobile_numbers',
+                            render: function(data) {
+                                if (!data || data.length === 0) return '-';
+                                return typeof data === 'object' ? data.map(d => d.number).join(', ') : data;
+                            }
+                        },
+                        { 
+                            data: 'emails',
+                            name: 'emails',
+                            render: function(data) {
+                                if (!data || data.length === 0) return '-';
+                                return Array.isArray(data) ? data.join(', ') : data;
+                            }
+                        },
+                        {
+                            data: null,
+                            name: 'action',
+                            orderable: false,
+                            searchable: false,
+                            className: 'text-center',
+                            render: function (data, type, row) {
+                                const deleteUrl = `{{ route('admin.contact.delete', ':id') }}`.replace(':id', row.id);
+                                return `
+                                    <a href="#" data-url="${deleteUrl}" class="btn btn-sm btn-danger btn-delete-provider" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                `;
+                            }
+                        }
+                    ]
+                });
 
-        // Handle delete
-        $(document).on('click', '.btn-delete-provider', function(e) {
-            e.preventDefault();
-            if (!confirm('Are you sure you want to delete this provider?')) return;
-            let url = $(this).data('url');
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(res) {
-                    alert(res.message);
-                    $('#providerTable').DataTable().ajax.reload();
-                },
-                error: function(err) {
-                    alert('Something went wrong!');
-                }
+                $('#contactsModal').modal('show');
+            });
+
+            $(document).on('click', '.btn-delete-provider', function(e) {
+                e.preventDefault();
+                if (!confirm('Are you sure you want to delete this contact?')) return;
+                
+                let url = $(this).data('url');
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        alert(res.message || 'Contact dropped successfully');
+                        if (modalContactsTable) modalContactsTable.ajax.reload();
+                        customerTable.ajax.reload(null, false);
+                    },
+                    error: function(err) {
+                        alert('Something went wrong during deletion process.');
+                    }
+                });
             });
         });
     </script>

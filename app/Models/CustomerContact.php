@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CustomerContact extends Model
 {
     protected $fillable = [
+        'customer_id',
         'name',
         'mobile_numbers',
         'emails',
@@ -16,4 +17,8 @@ class CustomerContact extends Model
         'mobile_numbers' => 'array',
         'emails' => 'array',
     ];
+
+    public function customer(){
+        return $this->belongsTo(User::class, 'customer_id','id');
+    }
 }

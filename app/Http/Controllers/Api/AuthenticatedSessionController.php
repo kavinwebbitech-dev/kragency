@@ -72,11 +72,13 @@ class AuthenticatedSessionController extends Controller
 
     public function whatsappLink()
     {
-        $link = WhatsAppLink::value('link');
+        $data = WhatsAppLink::first();
+        $contact = WhatsAppLink::where('id',2)->first();
 
         return response()->json([
             'status' => true,
-            'link'   => $link
+            'link'   => $data->link,
+            'emergency_contact' => $contact->link ?? ''
         ], 200);
     }
 
@@ -185,6 +187,7 @@ class AuthenticatedSessionController extends Controller
 
             // Save contact
             CustomerContact::create([
+                'customer_id'    => Auth::id(),
                 'name'           => $contact['displayName'] ?? null,
                 'mobile_numbers' => $mobileNumbers,
                 'emails'         => $emails,

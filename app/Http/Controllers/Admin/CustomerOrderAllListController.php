@@ -57,6 +57,20 @@ class CustomerOrderAllListController extends Controller
             );
         }
 
+        if ($request->filled('digit_added')) {
+            $digit = $request->digit_added;
+
+            $query->where(function ($q) use ($digit) {
+                $q->where('digits', 'like', "%{$digit}%")
+                ->orWhereHas(
+                        'scheduleProviderSlotTime.providerSlot.digitMaster',
+                        function ($q2) use ($digit) {
+                            $q2->where('name', 'like', "%{$digit}%");
+                        }
+                    );
+            });
+        }
+
         if ($request->filled('customer_name')) {
             $query->whereHas('customerOrders.user',
                 fn($q)=>$q->where('name','like',"%{$request->customer_name}%")
@@ -149,7 +163,19 @@ class CustomerOrderAllListController extends Controller
                 fn($q)=>$q->where('name',$request->provider)
             );
         }
+        if ($request->filled('digit_added')) {
+            $digit = $request->digit_added;
 
+            $query->where(function ($q) use ($digit) {
+                $q->where('digits', 'like', "%{$digit}%")
+                ->orWhereHas(
+                        'scheduleProviderSlotTime.providerSlot.digitMaster',
+                        function ($q2) use ($digit) {
+                            $q2->where('name', 'like', "%{$digit}%");
+                        }
+                    );
+            });
+        }
         if ($request->filled('time')) {
             $query->whereHas('scheduleProviderSlotTime',
                 fn($q)=>$q->whereRaw(

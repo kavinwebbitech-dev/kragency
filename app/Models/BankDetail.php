@@ -9,6 +9,7 @@ class BankDetail extends Model
     protected $table = 'bank_details';
     protected $fillable = [
         'user_id',
+        'ac_holder_name',
         'bank_name',
         'ifsc_code',
         'branch_name',

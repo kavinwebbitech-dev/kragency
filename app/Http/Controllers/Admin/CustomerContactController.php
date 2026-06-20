@@ -16,16 +16,28 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerContactController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         if ($request->ajax()) {
-            $contacts = CustomerContact::query();
+            $customers = User::has('contacts')->where('user_type', 'normal')->withCount('contacts');
+
+            return DataTables::of($customers)
+                ->addIndexColumn() 
+                ->make(true);
+        }
+
+        return view('admin.contacts.index');
+    }
+
+    public function getCustomerContacts(Request $request, $customerId)
+    {
+        if ($request->ajax()) {
+            $contacts = CustomerContact::where('customer_id', $customerId);
 
             return DataTables::of($contacts)
                 ->addIndexColumn()
                 ->make(true);
         }
-
-        return view('admin.contacts.index');
     }
 
     public function deleteContact($id, Request $request)

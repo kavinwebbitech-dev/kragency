@@ -26,30 +26,46 @@
                         <div class="card-body">
                             <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
                             <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <button id="exportBtnAll" class="btn btn-success mt-4">Export Filtered</button>
+                                <div class="col-md-2">
+                                    <button id="exportBtnAll" class="btn btn-success mt-4">
+                                        Export Filtered
+                                    </button>
                                 </div>
-                                <div class="col-md-3">
+
+                                <div class="col-md-2">
                                     <label for="customerNameFilterAll">Customer Name</label>
-                                    <input type="text" id="customerNameFilterAll" class="form-control" placeholder="Enter customer name">
+                                    <input type="text" id="customerNameFilterAll" class="form-control">
                                 </div>
+
+                                <div class="col-md-2">
+                                    <label for="digitFilterAll">Digit Added</label>
+                                    <input type="text" id="digitFilterAll" class="form-control">
+                                </div>
+
                                 <div class="col-md-3">
                                     <label for="providerFilterAll">Provider</label>
                                     <select id="providerFilterAll" class="form-control">
                                         <option value="">All</option>
-                                        @php $providers = $orders->pluck('scheduleProviderSlotTime.getProvider.name')->unique()->filter(); @endphp
+                                        @php
+                                            $providers = $orders->pluck('scheduleProviderSlotTime.getProvider.name')->unique()->filter();
+                                        @endphp
                                         @foreach($providers as $provider)
                                             <option value="{{ $provider }}">{{ $provider }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <div class="col-md-3">
                                     <label for="timeFilterAll">Time</label>
                                     <select id="timeFilterAll" class="form-control">
                                         <option value="">All</option>
-                                        @php $times = $orders->pluck('scheduleProviderSlotTime.slot_time')->unique()->filter(); @endphp
+                                        @php
+                                            $times = $orders->pluck('scheduleProviderSlotTime.slot_time')->unique()->filter();
+                                        @endphp
                                         @foreach($times as $time)
-                                            <option value="{{ \Carbon\Carbon::parse($time)->format('h:i A') }}">{{ \Carbon\Carbon::parse($time)->format('h:i A') }}</option>
+                                            <option value="{{ \Carbon\Carbon::parse($time)->format('h:i A') }}">
+                                                {{ \Carbon\Carbon::parse($time)->format('h:i A') }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -89,6 +105,7 @@
                                             d.provider = $('#providerFilterAll').val();
                                             d.time = $('#timeFilterAll').val();
                                             d.customer_name = $('#customerNameFilterAll').val();
+                                            d.digit_added = $('#digitFilterAll').val();
                                         }
                                     },
                                     dom: 'Bfrtip',
@@ -109,7 +126,7 @@
                                 $('#providerFilterAll, #timeFilterAll').on('change', function() {
                                     table.ajax.reload();
                                 });
-                                $('#customerNameFilterAll').on('keyup change', function() {
+                                $('#customerNameFilterAll, #digitFilterAll').on('keyup change', function() {
                                     table.ajax.reload();
                                 });
                                 // Custom export button

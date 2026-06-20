@@ -11,20 +11,28 @@ class WhatsAppController extends Controller
     {
         // Always use first row
         $data = WhatsAppLink::first();
-        return view('admin.whatsapp-link', compact('data'));
+        $contact = WhatsAppLink::where('id',2)->first();
+        return view('admin.whatsapp-link', compact('data','contact'));
     }
 
     public function save(Request $request)
     {
         $request->validate([
-            'link' => 'required|string'
+            'link' => 'nullable|string'
         ]);
-
-        WhatsAppLink::updateOrCreate(
-            ['id' => 1],
-            ['link' => $request->link]
-        );
-
-        return back()->with('success', 'WhatsApp link updated successfully!');
+        if($request->link){
+            WhatsAppLink::updateOrCreate(
+                ['id' => 1],
+                ['link' => $request->link]
+            );
+            return back()->with('success', 'WhatsApp link updated successfully!');
+        }
+        if($request->emergency_contact){
+            WhatsAppLink::updateOrCreate(
+                ['id' => 2],
+                ['link' => $request->emergency_contact]
+            );
+            return back()->with('success', 'Emergency Contact updated successfully!');
+        }
     }
 }

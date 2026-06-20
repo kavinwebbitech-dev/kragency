@@ -60,6 +60,19 @@ class CustomerOrderListController extends Controller
                 )
             );
         }
+        if ($request->filled('digit_added')) {
+            $digit = $request->digit_added;
+
+            $query->where(function ($q) use ($digit) {
+                $q->where('digits', 'like', "%{$digit}%")
+                ->orWhereHas(
+                        'scheduleProviderSlotTime.providerSlot.digitMaster',
+                        function ($q2) use ($digit) {
+                            $q2->where('name', 'like', "%{$digit}%");
+                        }
+                    );
+            });
+        }
 
         if ($request->filled('customer_name')) {
             $query->whereHas('customerOrders.user',

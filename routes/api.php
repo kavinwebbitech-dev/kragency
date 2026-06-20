@@ -8,17 +8,15 @@ use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\BankDetailController;
 
 Route::post('customer/login', [AuthenticatedSessionController::class, 'login']);
-Route::post('customer/contacts', [AuthenticatedSessionController::class, 'contactStore']);
 Route::get('customer/whatsapp-link', [AuthenticatedSessionController::class, 'whatsappLink']);
 Route::get('customer/results', [CustomerController::class, 'results']);
 Route::get('customer/game-schedule', [CustomerController::class, 'index']);
 // Route::get('customer/play-now/{id}/{time_id?}', [CustomerController::class, 'playGame']);
 Route::get('customer/play-now/{providerId}/{timeId?}',[CustomerController::class, 'playGameApi']);
 
-
 Route::prefix('customer')->group(function () {
     Route::middleware(['auth:sanctum', 'onlyCustomer'])->group(function () {
-
+        Route::post('/contacts', [AuthenticatedSessionController::class, 'contactStore']);
         Route::post('logout', [AuthenticatedSessionController::class, 'logout']);
         Route::get('profile', [CustomerController::class, 'profile']);
         Route::get('wallet', [CustomerController::class, 'wallet']);

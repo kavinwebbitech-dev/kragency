@@ -53,12 +53,16 @@
                             <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
                             <div class="row mb-3">
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <button id="exportBtn" class="btn btn-success mt-4">Export Filtered</button>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label for="customerNameFilter">Customer Name</label>
                                     <input type="text" id="customerNameFilter" class="form-control" placeholder="Enter customer name">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="digitFilterAll">Digit Added Search</label>
+                                    <input type="text" id="digitFilterAll" class="form-control">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="providerFilter">Provider</label>
@@ -112,9 +116,10 @@
                                     ajax: {
                                         url: '{{ route('admin.customer-orders.data') }}',
                                         data: function(d) {
-                                            d.provider = $('#providerFilter').val();
-                                            d.time = $('#timeFilter').val();
-                                            d.customer_name = $('#customerNameFilter').val();
+                                            d.provider = $('#providerFilterAll').val();
+                                            d.time = $('#timeFilterAll').val();
+                                            d.customer_name = $('#customerNameFilterAll').val();
+                                            d.digit_added = $('#digitFilterAll').val();
                                         }
                                     },
                                     dom: 'Bfrtip',
@@ -134,7 +139,7 @@
                                 $('#providerFilter, #timeFilter').on('change', function() {
                                     table.ajax.reload();
                                 });
-                                $('#customerNameFilter').on('keyup change', function() {
+                                $('#customerNameFilterAll, #digitFilterAll').on('keyup change', function() {
                                     table.ajax.reload();
                                 });
                                 // Custom export button

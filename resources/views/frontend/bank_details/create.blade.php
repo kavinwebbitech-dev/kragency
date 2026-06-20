@@ -30,6 +30,10 @@
                             <label for="bank_name">Bank Name</label>
                             <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name', $bankDetail->bank_name ?? '') }}" required>
                         </div>
+                        <div class="form-group mb-3">
+                            <label for="ac_holder_name">Account Holder Name</label>
+                            <input type="text" class="form-control" id="ac_holder_name" name="ac_holder_name" value="{{ old('ac_holder_name', $bankDetail->ac_holder_name ?? '') }}" required>
+                        </div>
 
                         <div class="form-group mb-3">
                             <label for="ifsc_code">IFSC Code</label>

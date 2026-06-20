@@ -79,6 +79,7 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::get('/admin/get-users-transaction/{user}', [UserController::class, 'getTransactionData'])->name('admin.users.get-transaction');
     Route::get('/admin/get-contacts', [CustomerContactController::class, 'index'])->name('admin.users.get-contacts');
     Route::delete('/admin/contact/delete/{id}', [CustomerContactController::class, 'deleteContact'])->name('admin.contact.delete');
+    Route::get('admin/customers/{customerId}/contacts', [CustomerContactController::class, 'getCustomerContacts'])->name('admin.customers.get-contacts-list');
     Route::get('admin/contacts/export',[CustomerContactController::class, 'export'])->name('admin.contacts.export');
     Route::get('/send',[CustomerContactController::class, 'send']);
 

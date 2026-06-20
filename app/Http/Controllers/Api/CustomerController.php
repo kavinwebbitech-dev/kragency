@@ -399,13 +399,36 @@ class CustomerController extends Controller
         $userId = Auth::id();
         $item = $request->item;
 
+        $closeMinutes = (int) CloseTime::value('minutes');
+
+        $slot = ScheduleProviderSlotTime::find($item['slot_time_id']);
+
+        if (!$slot) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Schedule not found.'
+            ], 404);
+        }
+
+        $scheduleTime = Carbon::parse($slot->time);
+        $closeDateTime = $scheduleTime->copy()->subMinutes($closeMinutes);
+
+        if (now()->greaterThanOrEqualTo($closeDateTime)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This game slot is closed. Betting time has expired.'
+            ], 422);
+        }
+
         $cart = Session::get("lotteryCart.$userId", []);
+
         $cart[] = $item;
 
         Session::put("lotteryCart.$userId", $cart);
 
         return response()->json([
             'success' => true,
+            'message' => 'Added to cart successfully.',
             'cart_count' => count($cart),
             'cart' => $cart
         ]);
@@ -470,10 +493,31 @@ class CustomerController extends Controller
     {
         $userId = Auth::id();
         $cart = $request->input('cart', []);
+        $walletTotal = 0;
+        $bonusTotal  = 0;
 
-        $walletTotal = 0; // all games
-        $bonusTotal  = 0; // only is_default games
+        $item = $request->newItem;
 
+        $closeMinutes = (int) CloseTime::value('minutes');
+
+        $slot = ScheduleProviderSlotTime::find($item['game_id']);
+
+        if (!$slot) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Schedule not found.'
+            ], 404);
+        }
+
+        $scheduleTime = Carbon::parse($slot->slot_time);
+        $closeDateTime = $scheduleTime->copy()->subMinutes($closeMinutes);
+
+        if (now()->greaterThanOrEqualTo($closeDateTime)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This game slot is closed. Betting time has expired.'
+            ], 422);
+        }
         // 1️⃣ Calculate totals from cart
         foreach ($cart as $item) {
 
@@ -552,6 +596,10 @@ class CustomerController extends Controller
     {
         $userId = Auth::id();
         $cart = $request->input('cart', []);
+        $closeMinutes = (int) CloseTime::value('minutes');
+
+        $validCart = [];
+        $expiredCart = [];
 
         if (empty($cart)) {
             return response()->json(['success' => false, 'message' => 'Cart is empty']);
@@ -566,7 +614,33 @@ class CustomerController extends Controller
         $orderTotal = 0;
         $paidItems = [];
 
-        foreach ($cart as $item) {
+        foreach ($cart as $cartItem) {
+        
+            $slot = ScheduleProviderSlotTime::find($cartItem['game_id']);
+        
+            if (!$slot) {
+                $expiredCart[] = $cartItem;
+                continue;
+            }
+        
+            $scheduleTime = Carbon::parse($slot->slot_time);
+            $closeDateTime = $scheduleTime->copy()->subMinutes($closeMinutes);
+        
+            if (now()->greaterThanOrEqualTo($closeDateTime)) {
+                $expiredCart[] = $cartItem;
+                continue;
+            }
+        
+            $validCart[] = $cartItem;
+        }
+        if (empty($validCart)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'All selected game slots have expired.',
+                'expired_items' => $expiredCart
+            ]);
+        }
+        foreach ($validCart as $item) {
             $game = \App\Models\ScheduleProviderSlotTime::with('getProvider')->find($item['game_id']);
             if (!$game || !$game->getProvider) continue;
 
@@ -625,6 +699,7 @@ class CustomerController extends Controller
         $wallet->save();
 
         return response()->json([
+            'order_amount' => $orderTotal,
             'success' => true,
             'message' => 'Order placed successfully',
             'order_id' => $order->id

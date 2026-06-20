@@ -169,6 +169,7 @@
                     const bank = res.bank;
                     $('#bankDetailModal .modal-body').html(`
                         <p><strong>Bank Name:</strong> ${bank.bank_name || ''}</p>
+                        <p><strong>Account Holder Name:</strong> ${bank.ac_holder_name || ''}</p>
                         <p><strong>IFSC Code:</strong> ${bank.ifsc_code || ''}</p>
                         <p><strong>Branch Name:</strong> ${bank.branch_name || ''}</p>
                         <p><strong>Account Number:</strong> ${bank.account_number || ''}</p>

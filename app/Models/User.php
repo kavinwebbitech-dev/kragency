@@ -52,4 +52,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(\App\Models\BankDetail::class, 'user_id', 'id');
     }
+
+    public function contacts() {
+        return $this->hasMany(CustomerContact::class, 'customer_id');
+    }
 }
