@@ -27,11 +27,21 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card mb-4">
-                        <div class="card-header">
-                            <h3 style="margin-top: 10px;" class="card-title">{{ __('customers/message.customer_contacts') }}</h3>
+                        <div class="card-header d-flex justify-content-end align-items-center gap-2">
                             <a href="{{ route('admin.contacts.export') }}" class="btn btn-success float-end">
                                 <i class="bi bi-download"></i> Export Contacts
                             </a>
+
+                            <!-- Delete All Button -->
+                            <form action="{{ route('admin.contact.delete.all') }}" method="POST"
+                                  onsubmit="return confirm('Are you sure you want to delete all contacts?');">
+                                @csrf
+                                @method('DELETE')
+                        
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i> Delete All
+                                </button>
+                            </form>
                         </div>
                         <div class="card-body">
                             <table id="customerTable" class="table table-bordered table-striped visual-table">

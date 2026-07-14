@@ -13,7 +13,7 @@ class WithdrawAdminController extends Controller
 {
     public function index()
     {
-        $requests = WithdrawRequest::with('user')->orderBy('created_at', 'desc')->get();
+        $requests = WithdrawRequest::with('user')->orderBy('id', 'desc')->get();
         return view('admin.withdraw.index', compact('requests'));
     }
 

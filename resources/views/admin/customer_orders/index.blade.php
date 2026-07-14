@@ -60,10 +60,6 @@
                                     <label for="customerNameFilter">Customer Name</label>
                                     <input type="text" id="customerNameFilter" class="form-control" placeholder="Enter customer name">
                                 </div>
-                                <div class="col-md-2">
-                                    <label for="digitFilterAll">Digit Added Search</label>
-                                    <input type="text" id="digitFilterAll" class="form-control">
-                                </div>
                                 <div class="col-md-3">
                                     <label for="providerFilter">Provider</label>
                                     <select id="providerFilter" class="form-control">
@@ -83,6 +79,10 @@
                                             <option value="{{ \Carbon\Carbon::parse($time)->format('h:i A') }}">{{ \Carbon\Carbon::parse($time)->format('h:i A') }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="digitFilterAll">Digit Added Search</label>
+                                    <input type="text" id="digitFilterAll" class="form-control">
                                 </div>
                             </div>
 
@@ -116,9 +116,9 @@
                                     ajax: {
                                         url: '{{ route('admin.customer-orders.data') }}',
                                         data: function(d) {
-                                            d.provider = $('#providerFilterAll').val();
-                                            d.time = $('#timeFilterAll').val();
-                                            d.customer_name = $('#customerNameFilterAll').val();
+                                            d.provider = $('#providerFilter').val();
+                                            d.time = $('#timeFilter').val();
+                                            d.customer_name = $('#customerNameFilter').val();
                                             d.digit_added = $('#digitFilterAll').val();
                                         }
                                     },

@@ -66,7 +66,7 @@ class PublishResultController extends Controller
                 )
                 ->whereNull('schedule_provider.deleted_at')
                 ->whereDate('schedule_provider.created_at', '<', now()->toDateString())
-                ->get();
+                ->orderBy('schedule_provider.created_at', 'desc');
 
             return DataTables::of($results)->make(true);
         }

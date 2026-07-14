@@ -39,6 +39,12 @@ class CustomerContactController extends Controller
                 ->make(true);
         }
     }
+    
+    public function deleteAllContact(Request $request)
+    {
+        CustomerContact::truncate();
+        return redirect()->back()->with('success', 'All contacts deleted successfully.');
+    }
 
     public function deleteContact($id, Request $request)
     {

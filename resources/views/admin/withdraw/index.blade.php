@@ -88,7 +88,9 @@
     @push('scripts')
     <script>
         $(function () {
-            $('#usersTable').DataTable();
+            $('#usersTable').DataTable({
+                order: [[0, 'desc']]
+            });
         });
     </script>
     @endpush

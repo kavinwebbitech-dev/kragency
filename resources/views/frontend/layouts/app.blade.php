@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
+    <meta name="google-site-verification" content="X6EqD48HgqxzamJHlJBhbUEHFnWotaBzS1OQ-lXxoQI" />
     {{-- Styles --}}
     <link rel="stylesheet" href="{{ asset('frontend/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/all.min.css') }}">
@@ -18,9 +18,17 @@
     <link rel="stylesheet" href="{{ asset('frontend/css/responsive.css') }}">
     <link rel="shortcut icon" href="{{ asset('frontend/images/favicon.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('frontend/css/header.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     @stack('styles')
     <title>@yield('title', 'Kragncy')</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D5DJNMCB6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-6D5DJNMCB6');
+    </script>
 </head>
 
 <body>

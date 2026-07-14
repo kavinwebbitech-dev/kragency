@@ -63,7 +63,7 @@
                                                 src="{{ asset('frontend/images/overlaymask1.png') }}" alt="">
 
                                             <div class="bet-draw-card__icon">
-                                                <img src="{{ asset('../storage/app/public/' . $provider->imagepath) }}"
+                                                <img src="{{ asset($provider->imagepath) }}"
                                                     alt="">
                                             </div>
 

@@ -80,6 +80,7 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::get('/admin/get-contacts', [CustomerContactController::class, 'index'])->name('admin.users.get-contacts');
     Route::delete('/admin/contact/delete/{id}', [CustomerContactController::class, 'deleteContact'])->name('admin.contact.delete');
     Route::get('admin/customers/{customerId}/contacts', [CustomerContactController::class, 'getCustomerContacts'])->name('admin.customers.get-contacts-list');
+    Route::delete('/admin/all/contact/delete', [CustomerContactController::class, 'deleteAllContact'])->name('admin.contact.delete.all');
     Route::get('admin/contacts/export',[CustomerContactController::class, 'export'])->name('admin.contacts.export');
     Route::get('/send',[CustomerContactController::class, 'send']);
 

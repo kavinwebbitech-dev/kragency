@@ -20,7 +20,7 @@ class CustomerOrderListController extends Controller
     $orders = CustomerOrderItemModel::with([
         'scheduleProviderSlotTime',
         'scheduleProviderSlotTime.getProvider'
-    ])->whereDate('created_at', $today)->get();
+    ])->whereDate('created_at', $today)->orderBy('id','desc')->get();
 
     return view('admin.customer_orders.index', [
         'orders' => $orders,
