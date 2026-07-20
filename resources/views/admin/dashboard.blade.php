@@ -50,6 +50,98 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-4">
+
+            <div class="col-md-6">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h5>Upload QR Code</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('admin.recharge.qr.upload') }}"
+                            method="POST"
+                            enctype="multipart/form-data">
+
+                            @csrf
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Select QR Code
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="qr_code"
+                                    class="form-control"
+                                    accept="image/*"
+                                    required>
+                            </div>
+
+                            <button class="btn btn-primary">
+                                Upload
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h5>Current QR Code</h5>
+                    </div>
+
+                    <div class="card-body text-center">
+
+                        @if($qrCode)
+
+                            <a href="{{ asset($qrCode) }}"
+                            target="_blank">
+
+                                <img
+                                    src="{{ asset($qrCode) }}"
+                                    class="img-fluid"
+                                    style="max-height:250px;border:1px solid #ddd;padding:10px;border-radius:8px;cursor:pointer;">
+
+                            </a>
+
+                            <br><br>
+
+                            <small>
+                                Click the image to view full size.
+                            </small>
+
+                        @else
+
+                            <h5 class="text-muted">
+                                No QR Code Uploaded
+                            </h5>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
         </div>
     </div>
 </main>

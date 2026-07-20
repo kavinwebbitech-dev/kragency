@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class CustomerLoginRequest extends FormRequest
     {
         return [
             'mobile' => ['required', 'string', 'max:15'],
-            'password' => ['required', 'string'],
+            'otp' => ['required', 'integer', 'digits:4'],
         ];
     }
 
@@ -41,13 +42,26 @@ class CustomerLoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $user = User::where('mobile', $this->mobile)
+            ->where('otp', $this->otp)
+            ->where('otp_created_at', '>', now()->subMinutes(5))
+            ->first();
+
+        if (! $user) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'otp' => 'Invalid or expired OTP.',
             ]);
         }
+
+        // Clear OTP after successful login
+        $user->update([
+            'otp' => null,
+            'otp_expired_at' => null,
+        ]);
+
+        Auth::login($user, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }
@@ -58,20 +72,20 @@ class CustomerLoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticateUser(): void
-    {
-        $this->ensureIsNotRateLimited();
+    // public function authenticateUser(): void
+    // {
+    //     $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('mobile', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+    //     if (! Auth::attempt($this->only('mobile', 'password'), $this->boolean('remember'))) {
+    //         RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
+    //         throw ValidationException::withMessages([
+    //             'email' => trans('auth.failed'),
+    //         ]);
+    //     }
 
-        RateLimiter::clear($this->throttleKey());
-    }
+    //     RateLimiter::clear($this->throttleKey());
+    // }
 
 
     /**
@@ -90,7 +104,7 @@ class CustomerLoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'mobile' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -102,6 +116,8 @@ class CustomerLoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(
+            Str::lower($this->string('mobile')).'|'.$this->ip()
+        );
     }
 }

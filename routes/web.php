@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BettingProviderController;
 use App\Http\Controllers\Admin\CustomerContactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PublishResultController;
+use App\Http\Controllers\Admin\RechargeController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Authentication\AuthenticatedSessionController;
@@ -38,7 +39,10 @@ Route::prefix('admin')->group(function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthenticatedSessionController::class, 'createCustomer'])->name('login');
+    Route::get('/register', [AuthenticatedSessionController::class, 'register'])->name('register');
     Route::post('login', [AuthenticatedSessionController::class, 'storeCustomer'])->name('login.check');
+    Route::post('/send-otp', [AuthenticatedSessionController::class, 'sendOtp'])->name('send.otp');
+    Route::post('/register/submit', [AuthenticatedSessionController::class, 'registerSubmit'])->name('register.submit');
 });
 
 Route::get('customer-results', [CustomerController::class, 'results'])->name('customer.results');
@@ -69,6 +73,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::get('/admin/dashboard', [UserController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/check-pending-alerts', [UserController::class, 'checkPendingAlerts'])
+    ->name('admin.checkPendingAlerts');
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/get-users-record', [UserController::class, 'getTableData'])->name('admin.users.get-record');
     //create route for create and edit user
@@ -109,6 +115,14 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::delete('/admin/subadmin/{id}', [SubAdminController::class, 'destroy'])
         ->name('admin.subadmin.destroy');
 
+    Route::get('/admin/recharge/list', [RechargeController::class, 'index'])->name('admin.recharge.index');
+    Route::get('/admin/recharge/report/data', [RechargeController::class, 'data'])->name('admin.recharge.data');
+    Route::post('/admin/recharge/qr/upload', [RechargeController::class, 'uploadQrCode'])->name('admin.recharge.qr.upload');
+    Route::get('/admin/recharge/approve/{id}', [RechargeController::class, 'approve'])->name('admin.recharges.approve');
+    Route::get('/admin/recharge/reject/{id}', [RechargeController::class, 'reject'])->name('admin.recharges.reject');
+    Route::get('/admin/kyc/index', [RechargeController::class, 'kycIndex'])->name('admin.kyc.index');
+    Route::get('/admin/kyc/view/{id}', [RechargeController::class, 'kycView'])->name('admin.kyc.view');
+    Route::put('/admin/kyc/update-status/{id}', [RechargeController::class, 'statusUpdate'])->name('admin.kyc.updateStatus');
 
     Route::get('/admin/wallet/report', [WalletReportController::class, 'index'])->name('admin.wallet.report.index');
     Route::get('/admin/wallet/report/data', [WalletReportController::class, 'data'])->name('admin.wallet.report.data');
@@ -120,6 +134,7 @@ Route::middleware(['auth', 'onlyAdmin'])->group(function () {
     Route::match(['get', 'post'], '/admin/wallet/add', [WalletController::class, 'addAmount'])->name('admin.wallet.add');
     Route::match(['get', 'post'], '/admin/wallet/deduct', [WalletController::class, 'deductAmount'])->name('admin.wallet.deduct');
     Route::get('/admin/wallet/{user}', [WalletController::class, 'viewTransactionLogs'])->name('admin.wallet.view-logs');
+    Route::get('/admin/wallet/pending', [WalletController::class, 'pendingRecharges'])->name('admin.wallet.pending');
 
     
     //providers

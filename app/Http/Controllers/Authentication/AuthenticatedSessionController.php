@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\CreateGameScheduleModel;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Session;
@@ -22,8 +23,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-       
         return view('auth.login');
+    }
+
+    public function register(): View
+    {
+        return view('frontend.register');
     }
 
     public function createCustomer(): View
@@ -51,18 +56,27 @@ class AuthenticatedSessionController extends Controller
 }
 
 
-    public function storeCustomer(CustomerLoginRequest $request): RedirectResponse
+   public function storeCustomer(CustomerLoginRequest $request): RedirectResponse
     {
-        $request->authenticateUser();
+        $request->authenticate();   // ✅ Use OTP authentication
+
         $request->session()->regenerate();
+
         $user = auth()->user();
 
-        if ($user['user_type'] != 'normal' || !$user['status'] || $user->deleted_at !== null) {
-            Auth::guard('web')->logout();
+        if (
+            $user->user_type != 'normal' ||
+            !$user->status ||
+            $user->deleted_at !== null
+        ) {
+            Auth::logout();
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return redirect()->route('login');
         }
+
         return redirect()->intended(route('customer.dashboard', absolute: false));
     }
 
@@ -90,5 +104,78 @@ class AuthenticatedSessionController extends Controller
         $currentTime = Carbon::now();
         //dd($data);
         return view('frontend.landing', $data);
+    }
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'mobile' => 'required|digits:10',
+            'type'   => 'required|in:register,login',
+        ]);
+
+        $user = User::where('mobile', $request->mobile)->first();
+
+        // Registration: User already exists
+        if ($request->type == 'register' && $user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number is already registered. Please login.',
+                'redirect' => route('login'),
+            ], 409);
+        }
+
+        // Login: User does not exist
+        if ($request->type == 'login' && !$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number is not registered. Please register first.',
+                'redirect' => route('register'),
+            ], 404);
+        }
+
+        $otp = rand(1000, 9999);
+
+        if (!$user) {
+            $user = new User();
+            $user->mobile = $request->mobile;
+        }
+
+        $user->otp = $otp;
+        $user->otp_created_at = now();
+        $user->save();
+
+        $message = "Welcome to Gason India! Your OTP for registration is: {$otp}. This OTP is valid for 5 minutes. Please do not share this code with anyone. Team Gason.";
+
+        $this->sendSms($request->mobile, $message);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'OTP sent successfully.',
+        ]);
+    }
+    private function sendSms($number, $message)
+    {
+        $url = "http://pay4sms.in/";
+        $token = "06e8ed1c1f10e2f05140416260699412";
+        $sender = "GASON";
+        $credit = "2";
+
+        $message = urlencode($message);
+
+        $smsUrl = $url . "sendsms/?token=" . $token .
+            "&sender=" . $sender .
+            "&number=" . $number .
+            "&credit=" . $credit .
+            "&message=" . $message;
+
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, $smsUrl);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+
+        $result = curl_exec($curl);
+
+        curl_close($curl);
+        return $result;
     }
 }

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\User; 
 use App\Models\Admin\WalletTransactionLogModel;
 use App\Models\CustomerContact;
+use App\Models\KycDetail;
+use App\Models\Recharge;
+use App\Models\Setting;
 use Yajra\DataTables\DataTables;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -26,18 +29,25 @@ class UserController extends Controller
 
     public function dashboard() {
         Artisan::call('optimize:clear');
-        // Active users (status = 1)
         $activeUsers = \App\Models\User::where('status', 1)->count();
-
-        // Total ordered amount
         $totalOrderedAmount = \App\Models\CustomerOrder::sum('total_amount');
 
-        // Total winning amount (sum of win_amount in CustomerOrderItemModel)
         $totalWinningAmount = \App\Models\CustomerOrderItemModel::whereNotNull('win_amount')->sum('win_amount');
-
-        return view('admin.dashboard', compact('activeUsers', 'totalOrderedAmount', 'totalWinningAmount'));
+        $qrCode = Setting::where('key', 'qr_code')->value('value');
+        return view('admin.dashboard', compact('qrCode','activeUsers', 'totalOrderedAmount', 'totalWinningAmount'));
     }
+    public function checkPendingAlerts()
+    {
+        $kycCount = KycDetail::where('status', 'pending')->count();
+        $rechargeCount = Recharge::where('image', '!=', null)->where('status', 'pending')->count();
 
+        return response()->json([
+            'success' => true,
+            'kyc_count' => $kycCount,
+            'recharge_count' => $rechargeCount,
+            'total' => $kycCount + $rechargeCount
+        ]);
+    }
     public function getTableData(Request $request)
     {
         if ($request->ajax()) {

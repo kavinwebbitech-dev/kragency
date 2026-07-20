@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Login - Kumaranbooking')
+@section('title', 'Register - Kumaranbooking')
 
 @push('styles')
     <style>
@@ -57,7 +57,27 @@
             font-size: 14px;
         }
 
-        /* STRICT FIX: Explicit Grid forcing input box to expand and button to wrap */
+        .form-control-custom {
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+            padding: 14px 16px !important;
+            border-radius: 12px !important;
+            border: 1.5px solid #e2e8f0 !important;
+            font-size: 15px !important;
+            transition: all 0.3s ease !important;
+            background: #f8fafc !important;
+            box-sizing: border-box !important;
+        }
+
+        .form-control-custom:focus {
+            border-color: #5c27fe !important;
+            box-shadow: 0 0 0 4px rgba(92, 39, 254, 0.1) !important;
+            outline: none !important;
+            background: #fff !important;
+        }
+
+        /* Grid forcing input box to expand and button to wrap neatly side-by-side */
         .phone-input-wrapper {
             display: grid !important;
             grid-template-columns: 1fr auto !important;
@@ -206,8 +226,8 @@
             <div class="login-card">
 
                 <div class="login-card-header">
-                    <h2>Welcome Back</h2>
-                    <p>Enter your mobile number to receive a 4-digit code</p>
+                    <h2>Create Your Account</h2>
+                    <p>Enter your details below to get started</p>
                 </div>
 
                 @if ($errors->any())
@@ -220,8 +240,20 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login.check') }}" method="POST" id="loginForm">
+                <form action="{{ route('register.submit') }}" method="POST" id="registerForm">
                     @csrf
+
+                    <!-- Added Name Field for Registration -->
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" 
+                               name="name" 
+                               id="name" 
+                               class="form-control-custom" 
+                               placeholder="Enter your full name" 
+                               required 
+                               value="{{ old('name') }}">
+                    </div>
 
                     <div class="form-group">
                         <label for="mobile">Mobile Number</label>
@@ -234,13 +266,13 @@
                                    value="{{ old('mobile') }}">
 
                             <button type="button" id="sendOtpBtn" class="btn-send-otp">
-                                Send OTP
+                                Get OTP
                             </button>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Enter 4-Digit OTP</label>
+                        <label>Verify 4-Digit OTP</label>
                         <div class="otp-container">
                             <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
                             <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
@@ -250,8 +282,8 @@
                         <input type="hidden" name="otp" id="finalOtp">
                     </div>
 
-                    <button type="submit" class="btn-login" id="loginBtn">
-                        Verify & Sign In
+                    <button type="submit" class="btn-login" id="registerBtn">
+                        Register Now
                     </button>
 
                     <div class="or-separator">or</div>
@@ -271,7 +303,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         const otpBoxes = document.querySelectorAll(".otp-box");
         const finalOtpInput = document.getElementById("finalOtp");
-        const form = document.getElementById("loginForm");
+        const form = document.getElementById("registerForm");
 
         otpBoxes.forEach((box, index) => {
             // Forward jumping focus logic
@@ -325,9 +357,9 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
             },
-            body: JSON.stringify({ mobile: mobile, type: "login" })
+            body: JSON.stringify({ mobile: mobile, type: "register" })
         })
         .then(response => response.json())
         .then(data => {
@@ -345,5 +377,5 @@
             alert('An error occurred while sending OTP. Please try again.');
         });
     });
-    </script>
+</script>
 @endpush

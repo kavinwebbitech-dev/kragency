@@ -4,9 +4,16 @@
     @if (!Auth::check())
         <div class="mobile-auth-bar d-lg-none bg-yellows">
             <div class="container d-flex justify-content-center">
-                <a href="{{ route('login') }}">
-                    <i class="fas fa-sign-in-alt mr-1"></i> Login / Register
-                </a>
+                @if (!request()->routeIs('register'))
+                    <a href="{{ route('register') }}">
+                        <i class="fas fa-user-plus mr-1"></i> Register
+                    </a>
+                @endif
+                @if (!request()->routeIs('login'))
+                    <a href="{{ route('login') }}">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                    </a>
+                @endif
             </div>
         </div>
     @endif
@@ -173,9 +180,17 @@
                     @else
                         {{-- LOGIN DESKTOP --}}
                         <li class="nav-item ml-3">
-                            <a class="btn btn-primary text-white px-3" href="{{ route('login') }}">
-                                Login / Register
-                            </a>
+                            @if (!request()->routeIs('login'))
+                                <a class="btn btn-primary text-white px-3" href="{{ route('login') }}">
+                                    Login
+                                </a>
+                            @endif
+
+                            @if (!request()->routeIs('register'))
+                                <a class="btn btn-primary text-white px-3" href="{{ route('register') }}">
+                                    Register
+                                </a>
+                            @endif
                         </li>
                     @endif
 
@@ -226,9 +241,16 @@
             @endauth
             @guest
                 <li>
-                    <a href="{{ route('login') }}">
-                        <i class="fas fa-sign-in-alt"></i> Login / Register
-                    </a>
+                    @if (Route::has('login'))
+                        <a href="{{ route('login') }}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    @endif
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    @endif
                 </li>
 
             @endguest

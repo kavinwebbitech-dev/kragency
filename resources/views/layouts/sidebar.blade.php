@@ -56,6 +56,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('admin.recharge.index') }}" class="nav-link">
+                            <i class="nav-icon bi bi-hourglass-split"></i>
+                            <p>Pending Recharges</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.kyc.index') }}" class="nav-link">
+                            <i class="nav-icon bi bi-person-check"></i>
+                            <p>KYC Details</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('admin.wallet.report.index') }}" class="nav-link">
                             <i class="nav-icon bi bi-wallet-fill"></i>
                             <p>Wallet Report</p>

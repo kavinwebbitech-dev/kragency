@@ -6,8 +6,11 @@ use App\Http\Controllers\Api\AuthenticatedSessionController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\BankDetailController;
+use App\Http\Controllers\Api\RechargeController;
 
 Route::post('customer/login', [AuthenticatedSessionController::class, 'login']);
+Route::post('customer/register', [AuthenticatedSessionController::class, 'register']);
+Route::post('customer/send-otp', [AuthenticatedSessionController::class, 'sendOtp']);
 Route::get('customer/whatsapp-link', [AuthenticatedSessionController::class, 'whatsappLink']);
 Route::get('customer/results', [CustomerController::class, 'results']);
 Route::get('customer/game-schedule', [CustomerController::class, 'index']);
@@ -35,6 +38,16 @@ Route::prefix('customer')->group(function () {
         Route::get('bank-details', [BankDetailController::class, 'show']);
         Route::post('bank-details-store', [BankDetailController::class, 'store']);
         Route::post('change-password', [CustomerController::class, 'customerPassword']);
+
+        Route::post('recharge',[RechargeController::class, 'storeRechage']);
+        Route::post('recharge/upload/{id}',[RechargeController::class, 'uploadImage']);
+        Route::get('recharge/history',[RechargeController::class, 'rechargeHistory']);
+        Route::get('recharge/history/{id}',[RechargeController::class, 'rechargeHistoryById']);
+
+        //kyc
+        Route::get('check/kyc',[RechargeController::class, 'checkkyc']);
+        Route::post('uploadKyc',[RechargeController::class, 'uploadKyc']);
+        Route::get('kyc/list',[RechargeController::class, 'kycList']);
         // Store device_token
         Route::post('/save-device-token', [AuthenticatedSessionController::class, 'saveDeviceToken']);
     });

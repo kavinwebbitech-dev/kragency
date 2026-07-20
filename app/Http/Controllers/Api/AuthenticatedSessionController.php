@@ -16,40 +16,48 @@ class AuthenticatedSessionController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'mobile'   => 'required|digits_between:8,15',
-            'password' => 'required'
+            'mobile' => 'required|digits_between:8,15',
+            'otp'    => 'required|digits:4',
         ]);
 
-        if (!Auth::attempt([
-            'mobile'   => $request->mobile,
-            'password' => $request->password,
-        ])) {
+        $user = User::where('mobile', $request->mobile)
+            ->where('otp', $request->otp)
+            ->where('otp_created_at', '>', now()->subMinutes(5))
+            ->first();
+
+        if (!$user) {
             return response()->json([
                 'status'  => false,
-                'message' => 'Invalid mobile or password'
+                'message' => 'Invalid or expired OTP.'
             ], 401);
         }
-
-        $user = Auth::user();
 
         if (
             $user->user_type !== 'normal' ||
             !$user->status ||
             $user->deleted_at !== null
         ) {
-            Auth::logout();
-
             return response()->json([
                 'status'  => false,
-                'message' => 'Unauthorized user'
+                'message' => 'Unauthorized user.'
             ], 403);
         }
 
+        // Clear OTP after successful login
+        $user->update([
+            'otp' => null,
+            'otp_expired_at' => null,
+        ]);
+
+        // Login user (optional for API)
+        Auth::login($user);
+
+        // Create Sanctum token
         $token = $user->createToken('customer_token')->plainTextToken;
 
         return response()->json([
             'status'  => true,
-            'message' => 'Login successful',
+            'message' => 'Login successful.',
             'token'   => $token,
             'user'    => [
                 'id'     => $user->id,
@@ -58,7 +66,99 @@ class AuthenticatedSessionController extends Controller
             ]
         ], 200);
     }
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'mobile' => 'required|digits_between:8,15',
+            'otp'    => 'required|digits:4',
+        ]);
 
+        $user = User::where('mobile', $request->mobile)
+            ->where('otp', $request->otp)
+            ->where('otp_created_at', '>', now()->subMinutes(5))
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or expired OTP.'
+            ], 401);
+        }
+
+        $user->update([
+            'name'            => $request->name,
+            'user_type'       => 'normal',
+            'status'          => 1,
+            'otp'             => null,
+            'otp_created_at'  => null,
+        ]);
+
+        $token = $user->createToken('customer_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration successful.',
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'mobile' => $user->mobile,
+            ]
+        ], 201);
+    }
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'mobile' => 'required|digits_between:8,15',
+        ]);
+        $otp = rand(1000, 9999);
+        $user = User::where('mobile', $request->mobile)->first();
+        if ($user) {
+            $user->otp = $otp;
+            $user->otp_created_at = now();
+            $user->save();
+        }else{
+           $user = User::create([
+                'name'=> $request->name ?? '-',
+                'mobile' => $request->mobile,
+                'otp' => $otp,
+                'otp_created_at' => now(),
+           ]);
+        }
+
+        $message = "Welcome to Gason India! Your OTP for registration is: {$otp} This OTP is valid for 5 minutes. Please do not share this code with anyone.Team Gason";
+
+        $this->sendSms($request->mobile, $message);
+
+        return response()->json([   'message' => 'OTP sent successfully.']);
+    }
+    private function sendSms($number, $message)
+    {
+        $url = "http://pay4sms.in/";
+        $token = "06e8ed1c1f10e2f05140416260699412";
+        $sender = "GASON";
+        $credit = "2";
+
+        $message = urlencode($message);
+
+        $smsUrl = $url . "sendsms/?token=" . $token .
+            "&sender=" . $sender .
+            "&number=" . $number .
+            "&credit=" . $credit .
+            "&message=" . $message;
+
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, $smsUrl);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+
+        $result = curl_exec($curl);
+
+        curl_close($curl);
+        return $result;
+    }
 
     public function logout(Request $request)
     {
