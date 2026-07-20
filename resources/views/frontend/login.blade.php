@@ -4,165 +4,202 @@
 
 @push('styles')
     <style>
-        /* Main Section Centering */
-        .login-section {
+        :root {
+            --kb-primary: #4e54c8;
+            --kb-secondary: #8f94fb;
+            --kb-accent: #ff4757;
+            --kb-light: #f8f9fa;
+            --kb-dark: #343a40;
+            --kb-success: #28a745;
+            --kb-gold: #ffd700;
+        }
+
+        .kb-login-section {
             min-height: calc(100vh - 80px);
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px 15px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            background-color: #ffffff;
         }
 
-        /* Modernized Card */
-        .login-card {
-            background: #ffffff;
-            padding: 45px 35px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(92, 39, 254, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+        .kb-login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1000px;
             width: 100%;
-            max-width: 420px;
-            margin: 0 auto;
-            text-align: center;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(78, 84, 200, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .kb-login-image {
+            background: linear-gradient(135deg, var(--kb-primary) 0%, var(--kb-secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
         }
 
+        .kb-login-image-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            background-image: url('{{ asset('frontend/images/loginimages.png') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .kb-login-form-side {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
         /* Header Text */
-        .login-card-header h2 {
-            margin-bottom: 8px;
-            font-size: 28px;
-            color: #1a1a1a;
+        .kb-login-header h2 {
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            color: var(--kb-dark);
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
-        .login-card-header p {
-            margin-bottom: 30px;
+        .kb-login-header p {
+            margin-bottom: 2rem;
             color: #6c757d;
-            font-size: 14px;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         /* Form Controls */
-        .form-group {
-            margin-bottom: 24px;
-            text-align: left;
+        .kb-login-form-group {
+            margin-bottom: 1.5rem;
         }
 
-        .form-group label {
+        .kb-login-form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #343a40;
-            font-size: 14px;
+            color: var(--kb-dark);
+            font-size: 0.9rem;
         }
 
-        /* STRICT FIX: Explicit Grid forcing input box to expand and button to wrap */
-        .phone-input-wrapper {
+        .kb-login-phone-wrapper {
             display: grid !important;
             grid-template-columns: 1fr auto !important;
-            gap: 12px !important;
+            gap: 0.75rem !important;
             width: 100% !important;
-            box-sizing: border-box !important;
         }
 
-        .phone-input-wrapper input {
+        .kb-login-input {
             width: 100% !important;
-            max-width: 100% !important;
-            display: block !important;
-            padding: 14px 16px !important;
+            padding: 0.875rem 1rem !important;
             border-radius: 12px !important;
             border: 1.5px solid #e2e8f0 !important;
-            font-size: 15px !important;
+            font-size: 1rem !important;
             transition: all 0.3s ease !important;
-            background: #f8fafc !important;
-            box-sizing: border-box !important;
+            background: var(--kb-light) !important;
+            color: var(--kb-dark) !important;
         }
 
-        .phone-input-wrapper input:focus {
-            border-color: #5c27fe !important;
-            box-shadow: 0 0 0 4px rgba(92, 39, 254, 0.1) !important;
+        .kb-login-input:focus {
+            border-color: var(--kb-primary) !important;
+            box-shadow: 0 0 0 4px rgba(78, 84, 200, 0.1) !important;
             outline: none !important;
             background: #fff !important;
         }
 
-        .btn-send-otp {
-            padding: 14px 24px !important;
+        .kb-login-btn-send {
+            padding: 0.875rem 1.5rem !important;
             border-radius: 12px !important;
             font-weight: 600 !important;
-            font-size: 14px !important;
+            font-size: 0.875rem !important;
             white-space: nowrap !important;
             transition: all 0.3s ease !important;
             border: none !important;
-            background-color: #007bff !important;
+            background-color: var(--kb-primary) !important;
             color: #fff !important;
-            display: inline-block !important;
-            height: auto !important;
+            cursor: pointer;
         }
 
-        .btn-send-otp:hover {
-            background-color: #0056b3 !important;
+        .kb-login-btn-send:hover {
+            background-color: var(--kb-secondary) !important;
         }
 
-        /* 4-Digit OTP Boxes */
-        .otp-container {
+        /* OTP Section (Hidden by Default) */
+        .kb-login-otp-section {
+            display: none;
+            /* Controlled via JS */
+        }
+
+        .kb-login-otp-container {
             display: flex;
             justify-content: space-between;
             gap: 12px;
-            margin: 20px 0 28px 0;
+            margin-top: 0.5rem;
         }
 
-        .otp-box {
-            width: 65px;
-            height: 65px;
+        .kb-login-otp-box {
+            width: calc(25% - 9px);
+            aspect-ratio: 1;
             text-align: center;
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
             border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            background: #f8fafc;
-            transition: all 0.2s ease-in-out;
+            border-radius: 12px;
+            background: var(--kb-light);
+            transition: all 0.2s ease;
+            color: var(--kb-dark);
         }
 
-        .otp-box:focus {
-            border-color: #5c27fe;
+        .kb-login-otp-box:focus {
+            border-color: var(--kb-primary);
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(92, 39, 254, 0.15);
+            box-shadow: 0 0 0 4px rgba(78, 84, 200, 0.15);
             outline: none;
         }
 
-        /* Action Buttons */
-        .btn-login {
+        /* Submit Buttons */
+        .kb-login-btn-submit {
+            display: none;
+            /* Controlled via JS */
             width: 100%;
-            background: linear-gradient(135deg, #5c27fe 0%, #461abf 100%);
+            background: linear-gradient(135deg, var(--kb-primary) 0%, var(--kb-secondary) 100%);
             color: #fff;
             border: none;
-            padding: 14px;
-            font-size: 16px;
+            padding: 1rem;
+            font-size: 1rem;
             font-weight: 600;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(92, 39, 254, 0.2);
+            margin-top: 1.5rem;
         }
 
-        .btn-login:hover {
+        .kb-login-btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(92, 39, 254, 0.35);
+            box-shadow: 0 6px 20px rgba(78, 84, 200, 0.3);
         }
 
-        .or-separator {
-            margin: 25px 0;
+        /* Social / External Links */
+        .kb-login-separator {
+            margin: 1.5rem 0;
             color: #94a3b8;
-            font-size: 13px;
-            position: relative;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .or-separator::before, .or-separator::after {
+        .kb-login-separator::before,
+        .kb-login-separator::after {
             content: "";
             flex: 1;
             background: #e2e8f0;
@@ -170,7 +207,7 @@
             margin: 0 10px;
         }
 
-        .btn-telegram {
+        .kb-login-btn-telegram {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -178,40 +215,73 @@
             width: 100%;
             background-color: #0088cc;
             color: #fff;
-            padding: 12px;
+            padding: 1rem;
             border-radius: 12px;
             text-decoration: none !important;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
         }
-        
-        .btn-telegram:hover {
+
+        .kb-login-btn-telegram:hover {
             background-color: #0077b6;
             transform: translateY(-1px);
+            color: #fff;
         }
 
-        .alert {
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            margin-bottom: 20px;
+        .kb-login-register {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .kb-login-register a {
+            color: var(--kb-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .kb-login-register a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kb-login-container {
+                grid-template-columns: 1fr;
+            }
+
+            .kb-login-image {
+                display: none;
+            }
+
+            .kb-login-form-side {
+                padding: 2rem 1.5rem;
+            }
         }
     </style>
 @endpush
 
 @section('content')
-    <section class="login-section">
-        <div class="container">
-            <div class="login-card">
+    <section class="kb-login-section">
+        <div class="kb-login-container">
 
-                <div class="login-card-header">
+            <!-- Left Side Image -->
+            <div class="kb-login-image">
+                <!-- Replace with an actual <img> tag for your project -->
+                <div class="kb-login-image-placeholder"></div>
+            </div>
+
+            <!-- Right Side Form -->
+            <div class="kb-login-form-side">
+                <div class="kb-login-header">
                     <h2>Welcome Back</h2>
-                    <p>Enter your mobile number to receive a 4-digit code</p>
+                    <p>Enter your mobile number to securely log in to your account.</p>
                 </div>
 
                 @if ($errors->any())
-                    <div class="alert alert-danger text-left">
+                    <div class="alert alert-danger text-left" style="border-radius: 12px; font-size: 0.875rem;">
                         <ul class="mb-0 text-start">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -220,130 +290,178 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login.check') }}" method="POST" id="loginForm">
+                <form action="{{ route('login.check') }}" method="POST" id="kbLoginForm">
                     @csrf
 
-                    <div class="form-group">
-                        <label for="mobile">Mobile Number</label>
-                        <div class="phone-input-wrapper">
-                            <input type="text"
-                                   name="mobile"
-                                   id="mobile"
-                                   placeholder="Enter mobile number"
-                                   required
-                                   value="{{ old('mobile') }}">
+                    <!-- Mobile Number -->
+                    <div class="kb-login-form-group">
+                        <label for="kbMobileInput">Mobile Number</label>
+                        <div class="kb-login-phone-wrapper">
+                            <input type="text" name="mobile" id="kbMobileInput" class="kb-login-input"
+                                placeholder="Enter mobile number" required value="{{ old('mobile') }}">
 
-                            <button type="button" id="sendOtpBtn" class="btn-send-otp">
+                            <button type="button" id="kbSendOtpBtn" class="kb-login-btn-send">
                                 Send OTP
                             </button>
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <!-- OTP Boxes (Hidden until triggered) -->
+                    <div class="kb-login-form-group kb-login-otp-section" id="kbOtpSection">
                         <label>Enter 4-Digit OTP</label>
-                        <div class="otp-container">
-                            <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
-                            <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
-                            <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
-                            <input type="text" class="otp-box" maxlength="1" pattern="\d*" inputmode="numeric" required>
+                        <div class="kb-login-otp-container">
+                            <input type="text" class="kb-login-otp-box" maxlength="1" pattern="\d*" inputmode="numeric">
+                            <input type="text" class="kb-login-otp-box" maxlength="1" pattern="\d*" inputmode="numeric">
+                            <input type="text" class="kb-login-otp-box" maxlength="1" pattern="\d*" inputmode="numeric">
+                            <input type="text" class="kb-login-otp-box" maxlength="1" pattern="\d*" inputmode="numeric">
                         </div>
-                        <input type="hidden" name="otp" id="finalOtp">
+                        <input type="hidden" name="otp" id="kbFinalOtp">
                     </div>
 
-                    <button type="submit" class="btn-login" id="loginBtn">
+                    <button type="submit" class="kb-login-btn-submit" id="kbLoginSubmitBtn">
                         Verify & Sign In
                     </button>
 
-                    <div class="or-separator">or</div>
+                    <div class="kb-login-separator">or</div>
 
-                    <a href="{{ $link ?? '#' }}" class="btn-telegram">
+                    <a href="{{ $link ?? '#' }}" class="kb-login-btn-telegram">
                         <i class="fab fa-telegram-plane"></i> Join Now on Telegram
                     </a>
 
+                    <!-- Register Link Added Here -->
+                    <div class="kb-login-register">
+                        Don't have an account? <a href="{{ route('register') }}">Register Now</a>
+                    </div>
                 </form>
             </div>
+
         </div>
     </section>
 @endsection
 
 @push('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const otpBoxes = document.querySelectorAll(".otp-box");
-        const finalOtpInput = document.getElementById("finalOtp");
-        const form = document.getElementById("loginForm");
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const otpBoxes = document.querySelectorAll(".kb-login-otp-box");
+            const finalOtpInput = document.getElementById("kbFinalOtp");
+            const form = document.getElementById("kbLoginForm");
 
-        otpBoxes.forEach((box, index) => {
-            // Forward jumping focus logic
-            box.addEventListener("input", (e) => {
-                if (e.target.value.length >= 1) {
-                    if (index < otpBoxes.length - 1) {
-                        otpBoxes[index + 1].focus();
+            // UI Elements for toggling visibility
+            const otpSection = document.getElementById("kbOtpSection");
+            const loginSubmitBtn = document.getElementById("kbLoginSubmitBtn");
+            const sendOtpBtn = document.getElementById("kbSendOtpBtn");
+            const mobileInput = document.getElementById("kbMobileInput");
+
+            // --- OTP Input Navigation Logic ---
+            otpBoxes.forEach((box, index) => {
+                box.addEventListener("input", (e) => {
+                    if (e.target.value.length >= 1) {
+                        if (index < otpBoxes.length - 1) {
+                            otpBoxes[index + 1].focus();
+                        }
                     }
-                }
+                    combineOtp();
+                });
+
+                box.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && e.target.value === "") {
+                        if (index > 0) {
+                            otpBoxes[index - 1].focus();
+                        }
+                    }
+                });
+            });
+
+            function combineOtp() {
+                let otpValue = "";
+                otpBoxes.forEach((box) => {
+                    otpValue += box.value;
+                });
+                finalOtpInput.value = otpValue;
+            }
+
+            form.addEventListener("submit", function(e) {
                 combineOtp();
-            });
-
-            // Smooth backspace focus correction logic
-            box.addEventListener("keydown", (e) => {
-                if (e.key === "Backspace" && e.target.value === "") {
-                    if (index > 0) {
-                        otpBoxes[index - 1].focus();
-                    }
+                if (finalOtpInput.value.length !== 4) {
+                    e.preventDefault();
+                    alert("Please fill out the full 4-digit OTP.");
                 }
             });
-        });
 
-        // Pack values into the main hidden field sent to backend
-        function combineOtp() {
-            let otpValue = "";
-            otpBoxes.forEach((box) => {
-                otpValue += box.value;
+            // --- Send OTP API Logic ---
+            sendOtpBtn.addEventListener('click', function() {
+                const mobile = mobileInput.value.trim();
+
+                if (!mobile) {
+                    alert('Please enter your mobile number.');
+                    return;
+                }
+
+                // Visual feedback while loading
+                const originalText = sendOtpBtn.innerHTML;
+                sendOtpBtn.innerHTML = 'Sending...';
+                sendOtpBtn.disabled = true;
+
+                fetch('{{ route('send.otp') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json', // CRITICAL: Forces Laravel to return JSON
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            mobile: mobile,
+                            type: "login"
+                        })
+                    })
+                    .then(async response => {
+                        // Handle Laravel 500 or 422 HTTP errors explicitly
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || 'Server error occurred.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Restore button state
+                        sendOtpBtn.innerHTML = originalText;
+                        sendOtpBtn.disabled = false;
+
+                        console.log("Laravel API Response:", data); // Debugging
+
+                        // Robust success check accommodating different backend response styles
+                        if (data.success || data.status === 'success' || data.status === 200 || data.status === true) {
+                            
+                            // Display OTP section
+                            otpSection.style.display = 'block';
+                            loginSubmitBtn.style.display = 'block';
+
+                            // Add required attributes dynamically to OTP boxes once visible
+                            otpBoxes.forEach(box => box.setAttribute('required', 'true'));
+
+                            // Focus on the first OTP box
+                            otpBoxes[0].focus();
+
+                            alert(data.message || 'OTP Sent Successfully!');
+                        } else {
+                            // Logic fallback if backend returned 200 but failed (e.g. invalid number)
+                            alert(data.message || 'Failed to send OTP. Please try again.');
+                            
+                            // Only redirect on failure/error if a redirect URL was provided
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        // Restore button state
+                        sendOtpBtn.innerHTML = originalText;
+                        sendOtpBtn.disabled = false;
+                        
+                        console.error('Fetch Error:', error);
+                        alert(error.message || 'An error occurred while sending OTP. Please try again.');
+                    });
             });
-            finalOtpInput.value = otpValue;
-        }
-
-        form.addEventListener("submit", function (e) {
-            combineOtp();
-            if (finalOtpInput.value.length !== 4) {
-                e.preventDefault();
-                alert("Please fill out the full 4-digit OTP.");
-            }
         });
-    });
-</script>
-<script>
-    document.getElementById('sendOtpBtn').addEventListener('click', function () {
-        const mobile = document.getElementById('mobile').value.trim();
-
-        if (!mobile) {
-            alert('Please enter your mobile number.');
-            return;
-        }
-
-        fetch('{{ route('send.otp') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ mobile: mobile, type: "login" })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-            } else {
-                alert(data.message || 'Failed to send OTP. Please try again.');
-            }
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while sending OTP. Please try again.');
-        });
-    });
     </script>
 @endpush

@@ -114,28 +114,11 @@ class AuthenticatedSessionController extends Controller
 
         $user = User::where('mobile', $request->mobile)->first();
 
-        // Registration: User already exists
-        if ($request->type == 'register' && $user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Mobile number is already registered. Please login.',
-                'redirect' => route('login'),
-            ], 409);
-        }
-
-        // Login: User does not exist
-        if ($request->type == 'login' && !$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Mobile number is not registered. Please register first.',
-                'redirect' => route('register'),
-            ], 404);
-        }
-
         $otp = rand(1000, 9999);
 
         if (!$user) {
             $user = new User();
+            $user->name = $request->name ?? '';
             $user->mobile = $request->mobile;
         }
 
@@ -177,5 +160,38 @@ class AuthenticatedSessionController extends Controller
 
         curl_close($curl);
         return $result;
+    }
+
+    public function registerSubmit(Request $request)
+    {
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'mobile' => 'required|digits_between:8,15',
+            'otp'    => 'required|digits:4',
+        ]);
+
+        $user = User::where('mobile', $request->mobile)
+            ->where('otp', $request->otp)
+            ->where('otp_created_at', '>', now()->subMinutes(5))
+            ->first();
+
+        if (!$user) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Invalid or expired OTP.');
+        }
+
+        $user->update([
+            'name'           => $request->name,
+            'user_type'      => 'normal',
+            'status'         => 1,
+            'otp'            => null,
+            'otp_created_at' => null,
+        ]);
+
+        // Login the user
+        Auth::login($user);
+
+        return redirect()->intended(route('customer.dashboard', absolute: false));
     }
 }

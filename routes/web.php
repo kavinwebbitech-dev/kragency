@@ -20,6 +20,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\SubAdminController;
 use App\Http\Controllers\Admin\WalletReportController;
+use App\Http\Controllers\KycController;
+use App\Http\Controllers\UserRechargeController;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/run-daily-game', function () {
@@ -221,6 +223,12 @@ Route::middleware(['auth', 'onlyCustomer'])->group(function () {
 
     // Route::get('customer-rules', [CustomerController::class, 'rules'])->name('customer.rules');
 
+    Route::get('/kyc', [KycController::class, 'index'])->name('customer.kyc.index');
+    Route::post('/kyc', [KycController::class, 'store'])->name('customer.kyc.store');
+
+    // Recharge Web Routes
+    Route::get('/recharge', [UserRechargeController::class, 'index'])->name('customer.recharge.index');
+    Route::post('/recharge', [UserRechargeController::class, 'store'])->name('customer.recharge.store');
 
     Route::get('customer-order-details', [CustomerController::class, 'customerOrderDetails'])->name('customer-order-details');
     Route::get('customer-change-password', [CustomerController::class, 'customerChangePassword'])->name('customer.change.password');

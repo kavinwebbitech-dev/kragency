@@ -41,41 +41,41 @@
             <div class="d-flex justify-content-end align-items-center d-lg-none">
                 <div class="mobile-icons">
                     @auth
-                    {{-- CART --}}
-                    <a href="{{ route('lottery.view.cart') }}" class="icon-btn position-relative">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="badge badge-danger cart-badge cartCount">
-                              {{ count(session('lotteryCart.' . auth()->id(), [])) }}
-                        </span>
-                    </a>
-
-
-                    {{-- RESULTS --}}
-                    <a href="{{ route('customer.results') }}" class="icon-btn text-black">
-                        <i class="fas fa-trophy"></i>
-                    </a>
-
-                    {{-- WALLET --}}
-                    @if (Auth::check())
-                        <div class="mobile-wallet">
-                            <i class="fas fa-wallet"></i>
-                            <span>₹{{ $user_detail?->wallet?->balance ?? 0 }}</span>
-                        </div>
-                    @endif
-                    {{-- Bonus --}}
-                    @if (Auth::check())
-                        <li class="nav-item d-flex align-items-center ml-3 wallet-ui">
-                            <i class="fas fa-gift mr-1"></i>
-                            <strong>{{ $user_detail?->wallet?->bonus_amount ?? 0 }}</strong>
-                        </li>
-                    @endif
-                    
-                    {{-- USER --}}
-                    @if (Auth::check())
-                        <a href="#" class="icon-btn" data-toggle="offcanvas" data-target="#userOffcanvas">
-                            <i class="fas fa-user"></i>
+                        {{-- CART --}}
+                        <a href="{{ route('lottery.view.cart') }}" class="icon-btn position-relative">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge badge-danger cart-badge cartCount">
+                                {{ count(session('lotteryCart.' . auth()->id(), [])) }}
+                            </span>
                         </a>
-                    @endif
+
+
+                        {{-- RESULTS --}}
+                        <a href="{{ route('customer.results') }}" class="icon-btn text-black">
+                            <i class="fas fa-trophy"></i>
+                        </a>
+
+                        {{-- WALLET --}}
+                        @if (Auth::check())
+                            <div class="mobile-wallet">
+                                <i class="fas fa-wallet"></i>
+                                <span>₹{{ $user_detail?->wallet?->balance ?? 0 }}</span>
+                            </div>
+                        @endif
+                        {{-- Bonus --}}
+                        @if (Auth::check())
+                            <li class="nav-item d-flex align-items-center ml-3 wallet-ui">
+                                <i class="fas fa-gift mr-1"></i>
+                                <strong>{{ $user_detail?->wallet?->bonus_amount ?? 0 }}</strong>
+                            </li>
+                        @endif
+
+                        {{-- USER --}}
+                        @if (Auth::check())
+                            <a href="#" class="icon-btn" data-toggle="offcanvas" data-target="#userOffcanvas">
+                                <i class="fas fa-user"></i>
+                            </a>
+                        @endif
                     @endauth
                     {{-- MENU --}}
                     <button class="navbar-toggler" type="button" data-toggle="offcanvas" data-target="#navOffcanvas">
@@ -88,28 +88,28 @@
             <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarNav">
                 <ul class="navbar-nav ml-auto align-items-lg-center">
                     @auth
-                    <li class="nav-item">
-                        <a class="nav-link"
-                            href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
-                            Home
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                                href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
+                                Home
+                            </a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('customer.results') }}">Results</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('customer.results') }}">Results</a>
+                        </li>
 
-                    {{-- <li class="nav-item">
+                        {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ route('customer.rules') }}">Rules</a>
                     </li> --}}
-                    @auth
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}"
-                            target="_blank">
-                            Recharge
-                        </a>
-                    </li>
-                    @endauth
+                        @auth
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}"
+                                    target="_blank">
+                                    Recharge
+                                </a>
+                            </li>
+                        @endauth
 
                     @endauth
 
@@ -143,13 +143,18 @@
                                 <i class="fas fa-user"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow-sm">
+                                <!-- User Info -->
                                 <div class="px-3 py-2 border-bottom">
                                     <strong>{{ $user_detail->name ?? '' }}</strong><br>
                                     <small class="text-muted">{{ $user_detail->mobile ?? '' }}</small>
                                 </div>
 
+                                <!-- Orders & Wallet -->
+                                <a class="dropdown-item" href="{{ route('customer.recharge.index') }}">
+                                    <i class="fas fa-bolt mr-2 text-warning"></i> Recharge Wallet
+                                </a>
                                 <a class="dropdown-item" href="{{ route('customer-order-details') }}">
-                                    <i class="fas fa-history mr-2"></i> Order History
+                                    <i class="fas fa-shopping-bag mr-2"></i> Order History
                                 </a>
                                 <a class="dropdown-item" href="{{ route('payment.history') }}">
                                     <i class="fas fa-wallet mr-2"></i> Payment History
@@ -157,6 +162,7 @@
 
                                 <div class="dropdown-divider"></div>
 
+                                <!-- Withdrawals & Bank -->
                                 <a class="dropdown-item" href="{{ route('customer.withdraw') }}">
                                     <i class="fas fa-money-bill-wave mr-2"></i> Withdraw
                                 </a>
@@ -166,12 +172,20 @@
                                 <a class="dropdown-item" href="{{ route('bank-details.create') }}">
                                     <i class="fas fa-university mr-2"></i> Add Bank Details
                                 </a>
+
+                                <div class="dropdown-divider"></div>
+
+                                <!-- Account Settings -->
+                                <a class="dropdown-item" href="{{ route('customer.kyc.index') }}">
+                                    <i class="fas fa-id-card mr-2"></i> KYC Verification
+                                </a>
                                 <a class="dropdown-item" href="{{ route('customer.change.password') }}">
-                                    <i class="fas fa-key me-2"></i> Change Password
+                                    <i class="fas fa-key mr-2"></i> Change Password
                                 </a>
 
                                 <div class="dropdown-divider"></div>
 
+                                <!-- Logout -->
                                 <a class="dropdown-item text-danger" href="{{ route('logout') }}">
                                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                                 </a>
@@ -216,28 +230,28 @@
     <div class="offcanvas-body">
         <ul class="offcanvas-menu">
             @auth
-            <li>
-                <a href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
-                    <i class="fas fa-home"></i> Home
-                </a>
-            </li>
-            
-            <li>
-                <a href="{{ route('customer.results') }}">
-                    <i class="fas fa-trophy"></i> Results
-                </a>
-            </li>
-            
-            <!--<li>-->
-            <!--    <a href="{{ route('customer.rules') }}">-->
-            <!--        <i class="fas fa-book"></i> Rules-->
-            <!--    </a>-->
-            <!--</li>-->
-            <li>
-                <a href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}" target="_blank">
-                    <i class="fab fa-whatsapp"></i> Recharge
-                </a>
-            </li>
+                <li>
+                    <a href="{{ Auth::check() ? route('customer.dashboard') : route('landing-dashboard') }}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('customer.results') }}">
+                        <i class="fas fa-trophy"></i> Results
+                    </a>
+                </li>
+
+                <!--<li>-->
+                <!--    <a href="{{ route('customer.rules') }}">-->
+                <!--        <i class="fas fa-book"></i> Rules-->
+                <!--    </a>-->
+                <!--</li>-->
+                <li>
+                    <a href="{{ $whatsapp_number ? 'https://wa.me/' . $whatsapp_number : '#' }}" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Recharge
+                    </a>
+                </li>
             @endauth
             @guest
                 <li>
